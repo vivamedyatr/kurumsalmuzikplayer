@@ -12,6 +12,23 @@ dotnet test -c Release
 ```
 Çıktı: `src/KurumsalMuzikPlayer/bin/Release/` (`KurumsalMuzikPlayer.exe`, `Kmp.Core.dll`, `Newtonsoft.Json.dll`, `mpv/`).
 
+## Kurulum dosyası
+```
+powershell -ExecutionPolicy Bypass -File scripts\kurulum.ps1
+```
+Derler, testleri çalıştırır, `dist\Kurumsal-Muzik-Player-Kurulum-<sürüm>.exe` üretir (Inno Setup 6 gerekir;
+betik `installer\KurumsalMuzikPlayer.iss`). Sürüm `Directory.Build.props` → `InformationalVersion`.
+Sessiz kurulum: `/VERYSILENT /SUPPRESSMSGBOXES`. Kurulum ve kaldırma çalışan programı önce `--kapat` ile kapatır.
+
+## Yerel sunucuyla deneme
+Program canlı sunucu yerine yerel geliştirme sunucusuna bağlanabilir (`../kurumsalmuzik`: `npm run db`, `npm run dev`):
+```
+$env:KMP_SERVER = "http://localhost:3000"   # sunucu
+$env:KMP_DATA_DIR = "<boş bir klasör>"      # ayrı veri klasörü
+$env:KMP_DURUM_SN = "10"                    # durum sorgusu 15 dk yerine 10 sn (düşmeyi beklemeden görmek için)
+```
+Yerel deneme hesabının bilgileri `deneme.env`'de (git'e girmez; sadece yerel veritabanında geçerli).
+
 ## Yapı
 | Yer | Ne |
 |---|---|
@@ -24,6 +41,7 @@ dotnet test -c Release
 `%LOCALAPPDATA%\Kurumsal Muzik Player\` (`KMP_DATA_DIR` ortam değişkeniyle değiştirilebilir):
 - `gunluk\motor-yyyy-MM-dd.txt`, `gunluk\pencere-yyyy-MM-dd.txt` — 7 gün tutulur
 - `ayarlar.json` — ses düzeyi
+- `cihaz.bin` — şube kaydı ve sunucu anahtarı (DPAPI ile şifreli; başka kullanıcı/bilgisayarda açılmaz)
 - `deneme-muzik\` — Faz 0: buraya konan ses dosyaları karışık ve döngüde çalar
 - `deneme-arsiv\` — Faz 0 dayanıklılık deneyinin yazdığı sahte arşiv (her deneyde silinip baştan yazılır)
 

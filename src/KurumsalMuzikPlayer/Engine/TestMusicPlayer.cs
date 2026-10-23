@@ -31,6 +31,7 @@ sealed class TestMusicPlayer
     int _restarts;
     DateTime _lastRestart = DateTime.MinValue;
     volatile bool _stopping;
+    bool _started;
 
     public TestMusicPlayer(string mpvExe, int volume)
     {
@@ -40,7 +41,18 @@ sealed class TestMusicPlayer
 
     public int Restarts => _restarts;
 
-    public void Start() => Task.Run(() => StartCore(0, 0));
+    /// <summary>Çalmayı başlatır (çalıyorsa bir şey yapmaz).</summary>
+    public void Start()
+    {
+        lock (_gate)
+        {
+            if (!_stopping && _started) return;
+            _started = true;
+            _stopping = false;
+            _status = "Ses motoru başlıyor";
+        }
+        Task.Run(() => StartCore(_index, 0));
+    }
 
     void StartCore(int startIndex, double startPos)
     {
@@ -62,7 +74,15 @@ sealed class TestMusicPlayer
             mpv.Observe(1, "media-title");
             mpv.Observe(2, "duration");
             mpv.Observe(3, "playlist-pos");
-            lock (_gate) _mpv = mpv;
+            lock (_gate)
+            {
+                if (_stopping)
+                {
+                    mpv.Stop();
+                    return;
+                }
+                _mpv = mpv;
+            }
             if (_files.Count == 0)
             {
                 SetStatus($"Deneme müzik klasörü boş: {AppPaths.TestMusicDir}");
@@ -166,11 +186,17 @@ sealed class TestMusicPlayer
         mpv?.Command("playlist-next");
     }
 
-    public void Stop()
+    /// <summary>Çalmayı durdurur (giriş ekranı, süre doldu, kapanış).</summary>
+    public void Stop(string status = "Durdu")
     {
-        _stopping = true;
         MpvClient? mpv;
-        lock (_gate) mpv = _mpv;
+        lock (_gate)
+        {
+            _stopping = true;
+            mpv = _mpv;
+            _mpv = null;
+            _status = status;
+        }
         mpv?.Stop();
     }
 

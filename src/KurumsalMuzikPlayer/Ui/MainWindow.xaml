@@ -27,7 +27,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Box" Property="BorderBrush" Value="#E3262B" />
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#F2EFE9" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.4" />
@@ -37,6 +37,26 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="Field" TargetType="Control">
+            <Setter Property="Foreground" Value="#F2EFE9" />
+            <Setter Property="Background" Value="#141417" />
+            <Setter Property="BorderBrush" Value="#34343B" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Margin" Value="0,4,0,12" />
+        </Style>
+        <Style TargetType="TextBox" BasedOn="{StaticResource Field}">
+            <Setter Property="CaretBrush" Value="#F2EFE9" />
+        </Style>
+        <Style TargetType="PasswordBox" BasedOn="{StaticResource Field}">
+            <Setter Property="CaretBrush" Value="#F2EFE9" />
+        </Style>
+        <Style x:Key="Label" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#8C8983" />
+        </Style>
     </Window.Resources>
 
     <Grid Margin="26,18,26,14">
@@ -44,14 +64,12 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Üst: yayında + saat -->
+        <!-- Üst: yayında + saat, sağda hesap · şube -->
         <DockPanel Grid.Row="0">
-            <TextBlock DockPanel.Dock="Right" Text="FAZ 0 · DENEME" FontSize="11" Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
+            <TextBlock x:Name="BranchText" DockPanel.Dock="Right" FontSize="11" Foreground="{StaticResource Muted}"
+                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="380" />
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <Ellipse x:Name="LiveDot" Width="8" Height="8" Fill="{StaticResource Red}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock x:Name="LiveText" Text="YAYINDA" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -59,63 +77,107 @@
             </StackPanel>
         </DockPanel>
 
-        <!-- Şimdi çalan -->
-        <Grid Grid.Row="1" VerticalAlignment="Center">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid Width="150" Height="150">
-                <Ellipse>
-                    <Ellipse.Fill>
-                        <RadialGradientBrush>
-                            <GradientStop Color="#1E1E22" Offset="0.3" />
-                            <GradientStop Color="#2B2B30" Offset="0.62" />
-                            <GradientStop Color="#141416" Offset="1" />
-                        </RadialGradientBrush>
-                    </Ellipse.Fill>
-                </Ellipse>
-                <Ellipse Width="46" Height="46" Fill="{StaticResource Red}" />
-                <Ellipse Width="6" Height="6" Fill="#0B0B0D" />
+        <!-- Çalar -->
+        <Grid x:Name="PlayerView" Grid.Row="1" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid Width="150" Height="150">
+                    <Ellipse>
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#1E1E22" Offset="0.3" />
+                                <GradientStop Color="#2B2B30" Offset="0.62" />
+                                <GradientStop Color="#141416" Offset="1" />
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                    </Ellipse>
+                    <Ellipse Width="46" Height="46" Fill="{StaticResource Red}" />
+                    <Ellipse Width="6" Height="6" Fill="#0B0B0D" />
+                </Grid>
+                <StackPanel Grid.Column="1" Margin="28,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="DENEME AKIŞI" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Red}" />
+                    <TextBlock x:Name="TitleText" Text="—" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis" Margin="0,6,0,0" />
+                    <TextBlock x:Name="SubText" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                </StackPanel>
             </Grid>
-            <StackPanel Grid.Column="1" Margin="28,0,0,0" VerticalAlignment="Center">
-                <TextBlock Text="DENEME AKIŞI" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Red}" />
-                <TextBlock x:Name="TitleText" Text="—" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis" Margin="0,6,0,0" />
-                <TextBlock x:Name="SubText" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+
+            <!-- Şarkı ilerlemesi (sadece bilgi) -->
+            <Grid Grid.Row="1" Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border x:Name="ProgressTrack" Height="3" Background="{StaticResource Line}" VerticalAlignment="Center">
+                    <Rectangle x:Name="ProgressFill" HorizontalAlignment="Left" Width="0" Fill="{StaticResource Red}" />
+                </Border>
+                <TextBlock x:Name="TimesText" Grid.Column="1" Text="0:00 / 0:00" FontFamily="Consolas" Foreground="{StaticResource Muted}" Margin="12,0,0,0" />
+            </Grid>
+
+            <!-- Ses ve sonraki -->
+            <DockPanel Grid.Row="2" Margin="0,16,0,0">
+                <Button x:Name="NextButton" DockPanel.Dock="Right" Content="Sonraki ›" Style="{StaticResource FlatButton}" Click="Next_Click" />
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Ses" Foreground="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <Slider x:Name="VolumeSlider" Width="220" Minimum="0" Maximum="100" VerticalAlignment="Center"
+                            IsMoveToPointEnabled="True" ValueChanged="Volume_ValueChanged" />
+                    <TextBlock x:Name="VolumeText" Width="32" FontFamily="Consolas" Foreground="{StaticResource Muted}" Margin="12,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Durum -->
+            <StackPanel Grid.Row="3" Margin="0,16,0,0">
+                <TextBlock x:Name="NoticeText" FontSize="12" Foreground="#E8B04A" TextWrapping="Wrap" Margin="0,0,0,3" Visibility="Collapsed" />
+                <TextBlock x:Name="StatusText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
+                <TextBlock x:Name="ExperimentText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0" Visibility="Collapsed" />
             </StackPanel>
         </Grid>
 
-        <!-- Şarkı ilerlemesi (sadece bilgi) -->
-        <Grid Grid.Row="2" Margin="0,8,0,0">
+        <!-- Şube girişi -->
+        <Grid x:Name="LoginView" Grid.Row="1" Visibility="Collapsed" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="32" />
+                <ColumnDefinition Width="320" />
             </Grid.ColumnDefinitions>
-            <Border x:Name="ProgressTrack" Height="3" Background="{StaticResource Line}" VerticalAlignment="Center">
-                <Rectangle x:Name="ProgressFill" HorizontalAlignment="Left" Width="0" Fill="{StaticResource Red}" />
-            </Border>
-            <TextBlock x:Name="TimesText" Grid.Column="1" Text="0:00 / 0:00" FontFamily="Consolas" Foreground="{StaticResource Muted}" Margin="12,0,0,0" />
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                <TextBlock Text="Şube girişi" FontSize="26" FontWeight="Bold" />
+                <TextBlock Text="Kurumsal Müzik Net kullanıcı adınız, şifreniz ve bu mağazanın şube adı."
+                           Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0" />
+                <TextBlock x:Name="LoginNotice" Foreground="#E8B04A" TextWrapping="Wrap" Margin="0,14,0,0" Visibility="Collapsed" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                <TextBlock Text="KULLANICI ADI" Style="{StaticResource Label}" />
+                <TextBox x:Name="UserBox" />
+                <TextBlock Text="ŞİFRE" Style="{StaticResource Label}" />
+                <PasswordBox x:Name="PassBox" />
+                <TextBlock Text="ŞUBE ADI" Style="{StaticResource Label}" />
+                <TextBox x:Name="BranchBox" />
+                <Button x:Name="LoginButton" Content="Giriş yap" IsDefault="True" Style="{StaticResource FlatButton}"
+                        Background="#E3262B" BorderBrush="#E3262B" FontWeight="SemiBold" Padding="18,9" Margin="0,4,0,0" Click="Login_Click" />
+                <TextBlock x:Name="LoginError" Foreground="#FF6B6B" TextWrapping="Wrap" Margin="0,10,0,0" />
+            </StackPanel>
         </Grid>
 
-        <!-- Ses ve sonraki -->
-        <DockPanel Grid.Row="3" Margin="0,16,0,0">
-            <Button x:Name="NextButton" DockPanel.Dock="Right" Content="Sonraki ›" Style="{StaticResource FlatButton}" Click="Next_Click" />
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Ses" Foreground="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                <Slider x:Name="VolumeSlider" Width="220" Minimum="0" Maximum="100" VerticalAlignment="Center"
-                        IsMoveToPointEnabled="True" ValueChanged="Volume_ValueChanged" />
-                <TextBlock x:Name="VolumeText" Width="32" FontFamily="Consolas" Foreground="{StaticResource Muted}" Margin="12,0,0,0" VerticalAlignment="Center" />
+        <!-- Hizmet süresi doldu -->
+        <Grid x:Name="ExpiredView" Grid.Row="1" Visibility="Collapsed">
+            <StackPanel Width="420" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Yayın durdu" FontSize="24" FontWeight="Bold" />
+                <TextBlock x:Name="ExpiredText" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0" />
             </StackPanel>
-        </DockPanel>
-
-        <!-- Durum -->
-        <StackPanel Grid.Row="4" Margin="0,16,0,0">
-            <TextBlock x:Name="StatusText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
-            <TextBlock x:Name="ExperimentText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0" Visibility="Collapsed" />
-        </StackPanel>
+        </Grid>
 
         <!-- Alt -->
-        <DockPanel Grid.Row="5" Margin="0,12,0,0">
+        <DockPanel Grid.Row="2" Margin="0,12,0,0">
             <TextBlock x:Name="VersionText" DockPanel.Dock="Right" FontSize="11" Foreground="{StaticResource Muted}" />
             <TextBlock FontSize="11">
                 <Hyperlink NavigateUri="https://vivamedya.com" RequestNavigate="Link_RequestNavigate"

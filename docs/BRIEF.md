@@ -55,12 +55,12 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 
 | Katman | Seçim | Neden |
 |---|---|---|
-| Çalışma ortamı | **.NET Framework 4.8** | Windows 10 (1903+) ve 11'de hazır gelir; Windows 7 SP1/8.1'e kurulum dosyası ekler (çevrimdışı yükleyici pakette). Ek çalışma zamanı taşınmaz, program küçük kalır. |
+| Çalışma ortamı | **.NET Framework 4.8** | Windows 10 (1903+) ve 11'de hazır gelir. ~~Windows 7 SP1/8.1'e kurulum dosyası ekler (çevrimdışı yükleyici pakette).~~ → Yoksa kurulum durur ve Microsoft'un indirme sayfasını açar (23 Eki 2026: .NET kurulumu yönetici izni ister, programın kurulumu istemez; 115 MB'lık yükleyiciyi her şubeye taşımamak için). Ek çalışma zamanı taşınmaz, program küçük kalır. |
 | Arayüz | **WPF** | Yerel Windows penceresi; tarayıcı motoru yok. Koyu tema, özel yazı tipleri, kapak görselleri rahat. Yazılımla çizim (eski ekran kartlarında takılmasın diye). |
 | Ses | **mpv.exe** (0.35, AVX2'siz x86_64) | 2.x'te Celeron/Win 8.1'de denendi. Ayrı süreç, JSON IPC (adlandırılmış boru). Müzik ve anons için iki mpv. |
 | Ağ | `HttpClient` (TLS 1.2 açıkça) | Windows 7'de TLS 1.2 kayıt defteri/güncelleme ihtiyacı kurulumda kontrol edilir. |
 | Gizli anahtar | Windows DPAPI (`ProtectedData`, kullanıcı kapsamı) | Cihaz anahtarı ve oturum. |
-| Kurulum | **Inno Setup** | Tek .exe, kullanıcı bazlı, Türkçe; .NET 4.8 yoksa kurar. |
+| Kurulum | **Inno Setup** | Tek .exe (26 MB), kullanıcı bazlı (`%LOCALAPPDATA%\Programs\Kurumsal Müzik Player`), yönetici izni istemez, Türkçe. Kaldırınca inen arşiv ve şube kaydı da silinir. |
 | Geliştirme | .NET 8 SDK (SDK tarzı proje, `net48` hedefi) | Visual Studio şart değil; `dotnet build` ile derlenir. |
 
 **Neden C# ve .NET Framework 4.8:** Windows 7'yi resmen destekleyen son çatı; antivirüslerin en iyi tanıdığı program
@@ -81,8 +81,12 @@ KurumsalMuzikPlayer.exe  (motor; görünmez, tepside)
   Her iş kendi iş parçacığında; disk ve ağ işi asla motorun ana döngüsünü beklemez.
 - **Pencere** ayrı süreç: sadece gösterir ve ses/sonraki komutlarını iletir. Kapatılınca kapanır (motor ve müzik sürer);
   tepsiden ya da kısayoldan yeniden açılır. Pencere donarsa motor fark eder, öldürür ve yeniden açar; müzik etkilenmez.
-- **Bekçi:** motor mpv'yi izler (çökerse kaldığı şarkıdan yeniden başlatır). Motorun kendisi Windows Görev
-  Zamanlayıcı'daki "oturum açılınca başlat + çökünce yeniden başlat" göreviyle ayakta tutulur (Kayıt Defteri Run anahtarı yerine; tek kopya kilidi ile).
+- **Bekçi:** motor mpv'yi izler (çökerse kaldığı şarkıdan yeniden başlatır); mpv'ler motora bağlıdır (motor ölürse
+  onlar da kapanır, sahipsiz ses kalmaz). Pencere açıksa motorun bekçisidir: motor 10 sn yoksa yeniden başlatır.
+  ~~Motorun kendisi Windows Görev Zamanlayıcı'daki "oturum açılınca başlat + çökünce yeniden başlat" göreviyle ayakta
+  tutulur.~~ → Oturum açılınca başlama: Kayıt Defteri Run anahtarı (HKCU; kurulum yazar, kaldırma siler). Çökünce
+  yeniden başlama: Windows Hata Bildirimi (`RegisterApplicationRestart`). Görev Zamanlayıcı'ya görev yazmak antivirüslerin
+  "kalıcılık" diye işaretlediği bir davranış (23 Eki 2026, BRIEF §1 birinci gereksinim).
 - **Günlük:** `%LOCALAPPDATA%\Kurumsal Muzik Player\gunluk\` — dönen (en fazla 7 gün) metin günlüğü; donma, çökme,
   indirme hatası gerçek sebebiyle yazılır. Uzaktan destekte "günlüğü gönder" (sunucuya, onayla).
 - **Veri klasörü:** `%LOCALAPPDATA%\Kurumsal Muzik Player\` (eski programla karışmaz).
@@ -167,7 +171,7 @@ açıkken 2 saat çalışır.
 ## 10. Durum
 
 - [ ] Faz 0 — İskelet ve kanıt deneyi (iskelet hazır, 23 Eki 2026: motor/pencere/mpv ayrı süreç, bekçiler denendi — pencere donunca 15 sn'de yeniden açılır, mpv çökünce 2 sn'de kaldığı yerden sürer, motor çökünce mpv de kapanır ve pencere motoru ~10 sn'de yeniden başlatır; ilk dayanıklılık denemesi Onur'un Kaspersky + Acronis'li bilgisayarında 9 dk, 0,41 GB albüm kabı yazımı: donma yok, Windows 1000/1002 kaydı yok, antivirüs uyarısı yok — 2.x bu bilgisayarda 0–7 dk içinde donuyordu; 24 saatlik kanıt bekliyor)
-- [ ] Faz 1 — Giriş ve cihaz
+- [ ] Faz 1 — Giriş ve cihaz (yapıldı, 23 Eki 2026: kurulum dosyası, giriş ekranı, cihaz kaydı DPAPI ile, 15 dk'da bir durum sorgusu, düşme, süre dolması, Windows'la başlama; yerel sunucuyla uçtan uca ve kur/güncelle/kaldır denendi. Onur'un Windows 7 ve 11 kanıtı bekliyor)
 - [ ] Faz 2 — İndirme ve arşiv
 - [ ] Faz 3 — Çalma, anonslar, internetsiz 7 gün
 - [ ] Faz 4 — Akış değişimi, paket döngüsü, güncelleme

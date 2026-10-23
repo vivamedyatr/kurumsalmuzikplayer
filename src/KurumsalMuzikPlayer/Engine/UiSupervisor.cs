@@ -32,6 +32,7 @@ sealed class UiSupervisor
 
     public event Action<JObject>? CommandReceived;
     public event Action? ShowRequested;
+    public event Action? QuitRequested;
 
     public int Restarts { get; private set; }
     public long MaxPongMs { get; private set; }
@@ -82,6 +83,10 @@ sealed class UiSupervisor
             case "hello" when (string?)m["role"] == "show":
                 ch.Close();
                 ShowRequested?.Invoke();
+                break;
+            case "hello" when (string?)m["role"] == "quit":
+                ch.Close();
+                QuitRequested?.Invoke();
                 break;
             case "hello" when (string?)m["role"] == "ui":
                 LineChannel? old;
@@ -192,6 +197,8 @@ sealed class UiSupervisor
             Log.Error("Pencere açılamadı", e);
         }
     }
+
+    public void Send(JObject msg) => SendState(msg);
 
     public void SendState(JObject state)
     {

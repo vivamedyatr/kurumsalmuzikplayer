@@ -12,6 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Kmp.Core\Kmp.Core.csproj" />
+    <Reference Include="System.Net.Http" />
     <None Include="..\..\vendor\mpv\mpv.exe" Link="mpv\mpv.exe" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\..\vendor\mpv\mpv.exe')" />
     <None Include="..\..\vendor\mpv\MPV-LISANS.txt" Link="mpv\MPV-LISANS.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

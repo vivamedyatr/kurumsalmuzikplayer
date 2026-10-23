@@ -8,3 +8,5 @@ out/
 *.env
 TestResults/
 vendor/mpv/mpv.exe
+dist/
+deneme.env

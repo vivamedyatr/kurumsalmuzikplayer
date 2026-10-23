@@ -20,6 +20,8 @@ sealed class EngineHost : ApplicationContext
 
     readonly NotifyIcon _tray;
     readonly TestMusicPlayer _music;
+    readonly Session _session = new();
+    readonly Control _mainThread = new();
     readonly UiSupervisor _ui;
     readonly ArchiveExperiment? _experiment;
     readonly Settings _settings;
@@ -40,6 +42,10 @@ sealed class EngineHost : ApplicationContext
         MpvClient.KillOrphans(mpvExe);
         _settings = Settings.Load();
         _ui = new UiSupervisor(exe);
+        _mainThread.CreateControl();
+        // Çökerse Windows motoru yeniden başlatsın (en az 60 sn çalışmış olmak şartıyla; Windows Hata Bildirimi).
+        var hr = RegisterApplicationRestart("--gizli", 0);
+        if (hr != 0) Log.Warn($"Çökünce yeniden başlatma kaydı yapılamadı (0x{hr:X})");
 
         _tray = new NotifyIcon
         {
@@ -51,12 +57,17 @@ sealed class EngineHost : ApplicationContext
         _tray.DoubleClick += (_, _) => _ui.Show();
 
         _music = new TestMusicPlayer(mpvExe, _settings.Volume);
-        _music.Start();
 
         _ui.CommandReceived += OnUiCommand;
         _ui.ShowRequested += () => _ui.Show();
+        _ui.QuitRequested += () => OnMainThread(Shutdown);
         _ui.Start();
-        if (!args.Has("--ui-acik")) _ui.Show(args.Has("--gizli"));
+
+        _session.ScreenChanged += OnScreenChanged;
+        _session.Start();
+        OnScreenChanged(_session.Current);
+        // Giriş gerekiyorsa pencere her durumda açık gelir.
+        if (!args.Has("--ui-acik")) _ui.Show(args.Has("--gizli") && _session.Current == Session.Screen.Player);
 
         if (args.Has("--deneme-arsiv"))
         {
@@ -78,7 +89,7 @@ sealed class EngineHost : ApplicationContext
         SystemEvents.SessionEnding += (_, e) =>
         {
             Log.Info($"Windows oturumu kapanıyor ({e.Reason})");
-            Shutdown();
+            OnMainThread(Shutdown);
         };
     }
 
@@ -99,10 +110,50 @@ sealed class EngineHost : ApplicationContext
         catch (Exception e) { Log.Warn($"Klasör açılamadı: {e.Message}"); }
     }
 
+    void OnMainThread(Action a)
+    {
+        try { _mainThread.BeginInvoke(a); }
+        catch (Exception e) { Log.Error("Ana iş parçacığına iletilemedi", e); }
+    }
+
+    void OnScreenChanged(Session.Screen screen)
+    {
+        Log.Info($"Ekran: {screen}");
+        switch (screen)
+        {
+            case Session.Screen.Player:
+                _music.Start();
+                break;
+            case Session.Screen.Login:
+                _music.Stop("Giriş bekleniyor");
+                _ui.Show();
+                break;
+            case Session.Screen.Expired:
+                _music.Stop("Hizmet süresi doldu");
+                _ui.Show();
+                break;
+        }
+        SendState();
+    }
+
     void OnUiCommand(JObject m)
     {
         switch ((string?)m["t"])
         {
+            case "login":
+                var user = (string?)m["username"] ?? "";
+                var pass = (string?)m["password"] ?? "";
+                var branch = (string?)m["branch"] ?? "";
+                _ = _session.LoginAsync(user, pass, branch).ContinueWith(t =>
+                {
+                    var r = t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion
+                        ? t.Result
+                        : new JObject { ["ok"] = false, ["error"] = "Giriş yapılamadı." };
+                    r["t"] = "login-result";
+                    _ui.Send(r);
+                    SendState();
+                });
+                break;
             case "volume":
                 var v = (int?)m["v"];
                 if (v == null) return;
@@ -121,6 +172,7 @@ sealed class EngineHost : ApplicationContext
         try
         {
             var s = _music.Snapshot();
+            s.Merge(_session.Describe());
             s["t"] = "state";
             s["exp"] = _experiment?.Summary();
             _ui.SendState(s);
@@ -175,4 +227,7 @@ sealed class EngineHost : ApplicationContext
         _tray.Dispose();
         ExitThread();
     }
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    static extern int RegisterApplicationRestart(string commandLine, int flags);
 }
