@@ -166,7 +166,7 @@ açıkken 2 saat çalışır.
 
 ## 10. Durum
 
-- [ ] Faz 0 — İskelet ve kanıt deneyi
+- [ ] Faz 0 — İskelet ve kanıt deneyi (iskelet hazır, 23 Eki 2026: motor/pencere/mpv ayrı süreç, bekçiler denendi — pencere donunca 15 sn'de yeniden açılır, mpv çökünce 2 sn'de kaldığı yerden sürer, motor çökünce mpv de kapanır ve pencere motoru ~10 sn'de yeniden başlatır; dayanıklılık deneyi Onur'un Kaspersky + Acronis'li bilgisayarında sürüyor)
 - [ ] Faz 1 — Giriş ve cihaz
 - [ ] Faz 2 — İndirme ve arşiv
 - [ ] Faz 3 — Çalma, anonslar, internetsiz 7 gün

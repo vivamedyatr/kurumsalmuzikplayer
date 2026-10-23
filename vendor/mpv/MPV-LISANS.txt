@@ -1,0 +1,14 @@
+Kurumsal Müzik Player, ses çalmak için ayrı bir program olarak mpv'yi kullanır.
+
+mpv — açık kaynaklı medya oynatıcısı
+Sürüm: 0.35.0-67-gad65c8855b (derleme: 1 Ocak 2023, shinchiro mpv-winbuild-cmake, x86_64)
+Dosya: mpv-x86_64-20230101-git-ad65c88.7z
+SHA-256 (arşiv): 761f449bfc3995252dbec16f7e03bc83e02c9c67384eb27cdf7eda028d25cfdc
+Kaynak kodu: https://github.com/mpv-player/mpv (commit ad65c8855b)
+Windows derlemesi ve derleme betikleri: https://github.com/shinchiro/mpv-winbuild-cmake
+Lisans: GNU General Public License v2 ya da sonrası (bazı parçalar LGPL); FFmpeg ve diğer kütüphaneler kendi
+açık kaynak lisanslarıyla. Lisans metinleri: https://github.com/mpv-player/mpv/blob/master/Copyright
+
+mpv bu programla birlikte ayrı bir çalıştırılabilir dosya (mpv.exe) olarak dağıtılır ve değiştirilmemiştir.
+Kaynak koduna yukarıdaki adreslerden ulaşılabilir; talep edilirse Viva Medya (info@vivamedya.com) aynı sürümün
+kaynak kodunu sağlar.

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>KurumsalMuzikPlayer</AssemblyName>
+    <RootNamespace>KurumsalMuzikPlayer</RootNamespace>
+    <StartupObject>KurumsalMuzikPlayer.Program</StartupObject>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Kmp.Core\Kmp.Core.csproj" />
+    <None Include="..\..\vendor\mpv\mpv.exe" Link="mpv\mpv.exe" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\..\vendor\mpv\mpv.exe')" />
+    <None Include="..\..\vendor\mpv\MPV-LISANS.txt" Link="mpv\MPV-LISANS.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
