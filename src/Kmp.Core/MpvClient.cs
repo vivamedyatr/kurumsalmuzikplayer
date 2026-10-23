@@ -48,6 +48,11 @@ public sealed class MpvClient : IDisposable
         var args = new List<string>
         {
             "--no-config", "--idle=yes", "--no-video", "--audio-display=no", "--no-terminal",
+            // Terminalsiz açılan mpv.exe kendiliğinden pencereli kipe (pseudo-gui) geçer; mağazada pencere görünmemeli.
+            "--force-window=no",
+            // Parçaları önden okur (yerel adres ya da ağ yavaşlarsa ses kesilmesin).
+            "--cache=yes", "--cache-secs=60", "--demuxer-readahead-secs=60",
+            "--msg-level=all=warn",
             $@"--input-ipc-server=\\.\pipe\{_pipeName}",
         };
         args.AddRange(extraArgs);
