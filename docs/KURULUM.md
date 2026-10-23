@@ -26,8 +26,11 @@ Program canlı sunucu yerine yerel geliştirme sunucusuna bağlanabilir (`../kur
 $env:KMP_SERVER = "http://localhost:3000"   # sunucu
 $env:KMP_DATA_DIR = "<boş bir klasör>"      # ayrı veri klasörü
 $env:KMP_DURUM_SN = "10"                    # durum sorgusu 15 dk yerine 10 sn (düşmeyi beklemeden görmek için)
+$env:KMP_HIZ_KBPS = "2000"                  # indirme hız sınırı (varsayılan 6000 = 6 Mbps)
 ```
 Yerel deneme hesabının bilgileri `deneme.env`'de (git'e girmez; sadece yerel veritabanında geçerli).
+Arşiv denemesi için yerel Worker (`npm run dev:media -- --yerel`) ve deneme müziği (`npm run media:test -- <tarz> --album "Ad"`)
+gerekir; ikisi de sadece bilgisayardaki taklit R2'yi kullanır.
 
 ## Yapı
 | Yer | Ne |
@@ -42,6 +45,11 @@ Yerel deneme hesabının bilgileri `deneme.env`'de (git'e girmez; sadece yerel v
 - `gunluk\motor-yyyy-MM-dd.txt`, `gunluk\pencere-yyyy-MM-dd.txt` — 7 gün tutulur
 - `ayarlar.json` — ses düzeyi
 - `cihaz.bin` — şube kaydı ve sunucu anahtarı (DPAPI ile şifreli; başka kullanıcı/bilgisayarda açılmaz)
+- `paket.json` — son offline paket (akış dilimleri, albümler, şarkılar; arşiv anahtarı hariç)
+- `cihaz-paket.json` — bu bilgisayarın albüm listesi ve "Aylık yeni müzik" anahtarı
+- `arsiv-anahtari.bin` — arşiv anahtarı (DPAPI)
+- `arsiv\<anahtar sürümü>\<albüm>.kmp` — albüm kapları (şifreli parçalar, Worker'dan geldiği gibi)
+- `kapak\<albüm>.jpg` — albüm kapakları
 - `deneme-muzik\` — Faz 0: buraya konan ses dosyaları karışık ve döngüde çalar
 - `deneme-arsiv\` — Faz 0 dayanıklılık deneyinin yazdığı sahte arşiv (her deneyde silinip baştan yazılır)
 

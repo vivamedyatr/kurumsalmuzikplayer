@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Drawing;
 using System.IO;
 using System.Threading;
@@ -21,6 +23,9 @@ sealed class EngineHost : ApplicationContext
     readonly NotifyIcon _tray;
     readonly TestMusicPlayer _music;
     readonly Session _session = new();
+    readonly object _libraryGate = new();
+    Library? _library;
+    LocalMediaServer? _media;
     readonly Control _mainThread = new();
     readonly UiSupervisor _ui;
     readonly ArchiveExperiment? _experiment;
@@ -56,7 +61,7 @@ sealed class EngineHost : ApplicationContext
         };
         _tray.DoubleClick += (_, _) => _ui.Show();
 
-        _music = new TestMusicPlayer(mpvExe, _settings.Volume);
+        _music = new TestMusicPlayer(mpvExe, _settings.Volume, PlayItems);
 
         _ui.CommandReceived += OnUiCommand;
         _ui.ShowRequested += () => _ui.Show();
@@ -122,18 +127,83 @@ sealed class EngineHost : ApplicationContext
         switch (screen)
         {
             case Session.Screen.Player:
+                StartLibrary();
                 _music.Start();
                 break;
             case Session.Screen.Login:
+                StopLibrary();
                 _music.Stop("Giriş bekleniyor");
                 _ui.Show();
                 break;
             case Session.Screen.Expired:
+                StopLibrary();
                 _music.Stop("Hizmet süresi doldu");
                 _ui.Show();
                 break;
         }
         SendState();
+    }
+
+    void StartLibrary()
+    {
+        lock (_libraryGate)
+        {
+            if (_library != null) return;
+            _library = new Library(() => _session.Token, msg => System.Threading.Tasks.Task.Run(() => _session.ReportRemoved(msg)));
+            _library.Changed += () => System.Threading.Tasks.Task.Run(_music.Refresh);
+            _media = new LocalMediaServer(_library);
+            _media.Start();
+            _library.Start();
+        }
+    }
+
+    void StopLibrary()
+    {
+        Library? lib;
+        LocalMediaServer? media;
+        lock (_libraryGate)
+        {
+            lib = _library;
+            media = _media;
+            _library = null;
+            _media = null;
+        }
+        lib?.Stop();
+        media?.Dispose();
+    }
+
+    /// <summary>
+    /// Çalınacaklar. Faz 2: arşivden inmiş bütün şarkılar (şu anki tarzınkiler önce); arşiv boşsa deneme klasörü.
+    /// Faz 3'te akışa (saat dilimlerine) göre çalan gerçek çalar gelir.
+    /// </summary>
+    List<PlayItem> PlayItems()
+    {
+        Library? lib;
+        LocalMediaServer? media;
+        lock (_libraryGate)
+        {
+            lib = _library;
+            media = _media;
+        }
+        var m = lib?.Current;
+        if (lib != null && media != null && m != null)
+        {
+            var order = m.GenreOrder(lib.IstanbulNow().Hour);
+            var albums = m.Albums.ToDictionary(a => a.Id, a => a.Title);
+            var genres = m.Genres.ToDictionary(g => g.Slug, g => g.Name);
+            var items = lib.ReadyTracks()
+                .OrderBy(t => order.IndexOf(t.Genre))
+                .Select(t => new PlayItem
+                {
+                    Url = media.TrackUrl(t),
+                    Title = t.Title,
+                    Sub = $"{(albums.TryGetValue(t.Album, out var a) ? a : "")} · {(genres.TryGetValue(t.Genre, out var g) ? g : t.Genre)}",
+                    FromArchive = true,
+                })
+                .ToList();
+            if (items.Count > 0) return items;
+        }
+        return TestMusicPlayer.TestFolderItems();
     }
 
     void OnUiCommand(JObject m)
@@ -173,6 +243,9 @@ sealed class EngineHost : ApplicationContext
         {
             var s = _music.Snapshot();
             s.Merge(_session.Describe());
+            Library? lib;
+            lock (_libraryGate) lib = _library;
+            s["library"] = lib?.Describe();
             s["t"] = "state";
             s["exp"] = _experiment?.Summary();
             _ui.SendState(s);
@@ -222,6 +295,7 @@ sealed class EngineHost : ApplicationContext
         _reportTimer.Dispose();
         _ui.CloseUi();
         _experiment?.Stop();
+        StopLibrary();
         _music.Stop();
         _tray.Visible = false;
         _tray.Dispose();

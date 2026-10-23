@@ -2,30 +2,36 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Kmp.Core;
 using Newtonsoft.Json.Linq;
 
 namespace KurumsalMuzikPlayer.Engine;
 
+/// <summary>Çalınacak bir şey: arşivden bir şarkı (yerel medya adresi) ya da deneme klasöründen bir dosya.</summary>
+sealed class PlayItem
+{
+    public string Url { get; set; } = "";
+    public string Title { get; set; } = "";
+    public string Sub { get; set; } = "";
+    public bool FromArchive { get; set; }
+}
+
 /// <summary>
-/// Faz 0: deneme-muzik klasöründeki dosyaları karışık ve döngüde çalar. mpv çökerse kaldığı şarkının kaldığı
-/// saniyesinden yeniden başlar. Faz 3'te yerini akışa göre çalan gerçek çalar alır.
+/// Faz 0–2: verilen listeyi döngüde çalar (Faz 2'den beri arşivden inen şarkılar; arşiv boşsa deneme-muzik klasörü).
+/// mpv çökerse kaldığı şarkının kaldığı saniyesinden yeniden başlar. Faz 3'te yerini akışa göre çalan gerçek çalar alır.
 /// </summary>
 sealed class TestMusicPlayer
 {
-    static readonly string[] AudioExtensions = { ".mp3", ".m4a", ".aac", ".wav", ".flac", ".ogg", ".opus", ".ts" };
-
     readonly string _mpvExe;
+    readonly Func<List<PlayItem>> _source;
     readonly object _gate = new();
-    List<string> _files = new();
+    List<PlayItem> _items = new();
     MpvClient? _mpv;
     int _offset;
     int _index;
     double _pos;
     double _dur;
-    string? _title;
     int _volume;
     string _status = "Ses motoru başlıyor";
     int _restarts;
@@ -33,10 +39,11 @@ sealed class TestMusicPlayer
     volatile bool _stopping;
     bool _started;
 
-    public TestMusicPlayer(string mpvExe, int volume)
+    public TestMusicPlayer(string mpvExe, int volume, Func<List<PlayItem>> source)
     {
         _mpvExe = mpvExe;
         _volume = volume;
+        _source = source;
     }
 
     public int Restarts => _restarts;
@@ -60,18 +67,10 @@ sealed class TestMusicPlayer
         try
         {
             if (!File.Exists(_mpvExe)) throw new FileNotFoundException("mpv.exe bulunamadı", _mpvExe);
-            if (_files.Count == 0)
-            {
-                var rng = new Random();
-                _files = Directory.GetFiles(AppPaths.TestMusicDir)
-                    .Where(f => AudioExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
-                    .OrderBy(_ => rng.Next()).ToList();
-            }
             var mpv = new MpvClient(_mpvExe, "muzik");
             mpv.PropertyChanged += OnProperty;
             mpv.Crashed += OnCrashed;
             mpv.Start(new[] { "--audio-buffer=2", $"--volume={_volume}", "--loop-playlist=inf" });
-            mpv.Observe(1, "media-title");
             mpv.Observe(2, "duration");
             mpv.Observe(3, "playlist-pos");
             lock (_gate)
@@ -83,22 +82,73 @@ sealed class TestMusicPlayer
                 }
                 _mpv = mpv;
             }
-            if (_files.Count == 0)
-            {
-                SetStatus($"Deneme müzik klasörü boş: {AppPaths.TestMusicDir}");
-                return;
-            }
-            var n = _files.Count;
-            _offset = ((startIndex % n) + n) % n;
-            if (startPos > 1) mpv.Command("loadfile", _files[_offset], "replace", "start=" + ((int)startPos).ToString());
-            else mpv.Command("loadfile", _files[_offset], "replace");
-            for (var i = 1; i < n; i++) mpv.Command("loadfile", _files[(_offset + i) % n], "append");
-            SetStatus($"Çalıyor · {n} deneme dosyası");
+            Load(_items.Count > 0 ? _items : _source(), startIndex, startPos);
         }
         catch (Exception e)
         {
             Log.Error("Ses motoru başlatılamadı", e);
             SetStatus("Ses motoru başlatılamadı: " + e.Message);
+        }
+    }
+
+    void Load(List<PlayItem> items, int startIndex, double startPos)
+    {
+        MpvClient? mpv;
+        lock (_gate)
+        {
+            mpv = _mpv;
+            _items = items;
+        }
+        if (mpv == null) return;
+        if (items.Count == 0)
+        {
+            SetStatus($"Çalınacak şarkı yok: arşiv iniyor ya da deneme müzik klasörü boş ({AppPaths.TestMusicDir})");
+            return;
+        }
+        var n = items.Count;
+        lock (_gate)
+        {
+            _offset = ((startIndex % n) + n) % n;
+            _index = _offset;
+        }
+        if (startPos > 1) mpv.Command("loadfile", items[_offset].Url, "replace", "start=" + ((int)startPos).ToString());
+        else mpv.Command("loadfile", items[_offset].Url, "replace");
+        for (var i = 1; i < n; i++) mpv.Command("loadfile", items[(_offset + i) % n].Url, "append");
+        SetStatus(items[0].FromArchive ? $"Çalıyor · arşivden {n} şarkı" : $"Çalıyor · {n} deneme dosyası");
+    }
+
+    /// <summary>
+    /// Liste değişti (arşive yeni şarkılar indi): yeni şarkılar sona eklenir. Deneme dosyalarından arşive geçişte liste
+    /// baştan kurulur.
+    /// </summary>
+    public void Refresh()
+    {
+        if (_stopping) return;
+        var fresh = _source();
+        MpvClient? mpv;
+        List<PlayItem> current;
+        lock (_gate)
+        {
+            mpv = _mpv;
+            current = _items;
+        }
+        if (mpv == null || fresh.Count == 0) return;
+        var switching = current.Count == 0 || current[0].FromArchive != fresh[0].FromArchive;
+        if (switching && (fresh[0].FromArchive ? fresh.Count >= 3 : current.Count == 0))
+        {
+            Log.Info(fresh[0].FromArchive ? "Arşivden çalmaya geçiliyor" : "Deneme dosyaları çalıyor");
+            Load(fresh, 0, 0);
+            return;
+        }
+        if (switching) return;
+        var known = new HashSet<string>(current.Select(i => i.Url));
+        var added = fresh.Where(i => !known.Contains(i.Url)).ToList();
+        if (added.Count == 0) return;
+        foreach (var i in added) mpv.Command("loadfile", i.Url, "append");
+        lock (_gate)
+        {
+            _items = current.Concat(added).ToList();
+            _status = $"Çalıyor · arşivden {_items.Count} şarkı";
         }
     }
 
@@ -108,15 +158,15 @@ sealed class TestMusicPlayer
         {
             switch (name)
             {
-                case "media-title":
-                    _title = value?.Type == JTokenType.String ? (string?)value : null;
-                    if (_title != null) Log.Info($"Çalıyor: {_title}");
-                    break;
                 case "duration":
                     _dur = value?.Type is JTokenType.Float or JTokenType.Integer ? (double)value : 0;
                     break;
                 case "playlist-pos":
-                    if (value?.Type == JTokenType.Integer && _files.Count > 0) _index = (_offset + (int)value) % _files.Count;
+                    if (value?.Type == JTokenType.Integer && _items.Count > 0)
+                    {
+                        _index = (_offset + (int)value) % _items.Count;
+                        Log.Info($"Çalıyor: {_items[_index].Title}");
+                    }
                     break;
             }
         }
@@ -152,11 +202,11 @@ sealed class TestMusicPlayer
         }, "get_property", "time-pos");
         lock (_gate)
         {
-            var file = _files.Count > 0 ? _files[_index] : null;
+            var item = _items.Count > 0 ? _items[_index] : null;
             return new JObject
             {
-                ["title"] = _title ?? (file != null ? Path.GetFileNameWithoutExtension(file) : "—"),
-                ["sub"] = file != null ? Path.GetFileName(file) : AppPaths.TestMusicDir,
+                ["title"] = item?.Title ?? "—",
+                ["sub"] = item?.Sub ?? "",
                 ["pos"] = _pos,
                 ["dur"] = _dur,
                 ["vol"] = _volume,
@@ -195,6 +245,7 @@ sealed class TestMusicPlayer
             _stopping = true;
             mpv = _mpv;
             _mpv = null;
+            _items = new List<PlayItem>();
             _status = status;
         }
         mpv?.Stop();
@@ -203,5 +254,17 @@ sealed class TestMusicPlayer
     void SetStatus(string s)
     {
         lock (_gate) _status = s;
+    }
+
+    /// <summary>Deneme klasöründeki ses dosyaları, karışık.</summary>
+    public static List<PlayItem> TestFolderItems()
+    {
+        string[] audio = { ".mp3", ".m4a", ".aac", ".wav", ".flac", ".ogg", ".opus", ".ts" };
+        var rng = new Random();
+        return Directory.GetFiles(AppPaths.TestMusicDir)
+            .Where(f => audio.Contains(Path.GetExtension(f).ToLowerInvariant()))
+            .OrderBy(_ => rng.Next())
+            .Select(f => new PlayItem { Url = f, Title = Path.GetFileNameWithoutExtension(f), Sub = Path.GetFileName(f) })
+            .ToList();
     }
 }

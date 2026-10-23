@@ -90,7 +90,7 @@ public sealed class ArchiveExperiment
                     {
                         _rng.NextBytes(data);
                         var sw = Stopwatch.StartNew();
-                        if (container != null) container.Append(t, s, data, data.Length);
+                        if (container != null) container.Append((uint)t, s, data, data.Length);
                         else WriteFilePattern(album, t, s, data);
                         sw.Stop();
                         lock (_statsGate)
@@ -179,8 +179,8 @@ public sealed class ArchiveExperiment
                 if (a.Count == 0) return;
                 var t = _rng.Next(TracksPerAlbum);
                 var s = _rng.Next(SegmentsPerTrack);
-                if (!a.Contains(t, s)) return;
-                var ok = a.TryRead(t, s) != null;
+                if (!a.Contains((uint)t, s)) return;
+                var ok = a.TryRead((uint)t, s) != null;
                 lock (_statsGate)
                 {
                     Reads++;

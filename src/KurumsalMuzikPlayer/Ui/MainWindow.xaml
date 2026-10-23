@@ -138,6 +138,7 @@
             <StackPanel Grid.Row="3" Margin="0,16,0,0">
                 <TextBlock x:Name="NoticeText" FontSize="12" Foreground="#E8B04A" TextWrapping="Wrap" Margin="0,0,0,3" Visibility="Collapsed" />
                 <TextBlock x:Name="StatusText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
+                <TextBlock x:Name="LibraryText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0" Visibility="Collapsed" />
                 <TextBlock x:Name="ExperimentText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0" Visibility="Collapsed" />
             </StackPanel>
         </Grid>

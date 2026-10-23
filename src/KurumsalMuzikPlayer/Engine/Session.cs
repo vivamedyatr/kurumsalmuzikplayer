@@ -43,6 +43,27 @@ sealed class Session
         }
     }
 
+    /// <summary>Cihaz anahtarı (giriş yoksa null).</summary>
+    public string? Token
+    {
+        get { lock (_gate) return _device?.Token; }
+    }
+
+    /// <summary>Başka bir sorgu (paket, anons) cihazın tanınmadığını (401) bildirdi.</summary>
+    public void ReportRemoved(string? message)
+    {
+        lock (_gate)
+        {
+            if (_device == null) return;
+            _device = null;
+            _expired = false;
+            _notice = message ?? "Bu cihaz panelden kaldırıldı. Yeniden giriş yapın.";
+            DeviceStore.Clear();
+        }
+        Log.Warn("Sunucu cihazı tanımadı (401): " + message);
+        ScreenChanged?.Invoke(Current);
+    }
+
     public void Start()
     {
         var d = DeviceStore.Load();

@@ -33,16 +33,16 @@ public sealed class AlbumContainerTests : IDisposable
     {
         using (var c = AlbumContainer.Open(FilePath))
         {
-            c.Append(0, 0, Data(1000, 1), 1000);
-            c.Append(0, 1, Data(2000, 2), 2000);
-            c.Append(39, 20, Data(500, 3), 500);
-            Assert.Equal(Data(2000, 2), c.TryRead(0, 1));
+            c.Append(0u, 0, Data(1000, 1), 1000);
+            c.Append(0u, 1, Data(2000, 2), 2000);
+            c.Append(39u, 20, Data(500, 3), 500);
+            Assert.Equal(Data(2000, 2), c.TryRead(0u, 1));
         }
         using var reopened = AlbumContainer.Open(FilePath);
         Assert.Equal(3, reopened.Count);
-        Assert.Equal(Data(1000, 1), reopened.TryRead(0, 0));
-        Assert.Equal(Data(500, 3), reopened.TryRead(39, 20));
-        Assert.Null(reopened.TryRead(1, 0));
+        Assert.Equal(Data(1000, 1), reopened.TryRead(0u, 0));
+        Assert.Equal(Data(500, 3), reopened.TryRead(39u, 20));
+        Assert.Null(reopened.TryRead(1u, 0));
         Assert.Equal(AlbumContainer.FileHeaderSize + 3 * AlbumContainer.RecordHeaderSize + 3500, new FileInfo(FilePath).Length);
     }
 
@@ -51,33 +51,33 @@ public sealed class AlbumContainerTests : IDisposable
     {
         using (var c = AlbumContainer.Open(FilePath))
         {
-            c.Append(0, 0, Data(1000, 1), 1000);
-            c.Append(0, 1, Data(1000, 2), 1000);
+            c.Append(0u, 0, Data(1000, 1), 1000);
+            c.Append(0u, 1, Data(1000, 2), 1000);
         }
         var full = new FileInfo(FilePath).Length;
         using (var fs = new FileStream(FilePath, FileMode.Open)) fs.SetLength(full - 300); // elektrik kesildi
         using var reopened = AlbumContainer.Open(FilePath);
         Assert.Equal(1, reopened.Count);
-        Assert.False(reopened.Contains(0, 1));
+        Assert.False(reopened.Contains(0u, 1));
         Assert.Equal(full - 1000 - AlbumContainer.RecordHeaderSize, new FileInfo(FilePath).Length);
-        reopened.Append(0, 1, Data(1000, 2), 1000); // yeniden iner
-        Assert.Equal(Data(1000, 2), reopened.TryRead(0, 1));
+        reopened.Append(0u, 1, Data(1000, 2), 1000); // yeniden iner
+        Assert.Equal(Data(1000, 2), reopened.TryRead(0u, 1));
     }
 
     [Fact]
     public void LaterCopyOfSameSegmentWins()
     {
         using var c = AlbumContainer.Open(FilePath);
-        c.Append(2, 3, Data(100, 1), 100);
-        c.Append(2, 3, Data(120, 9), 120);
+        c.Append(2u, 3, Data(100, 1), 100);
+        c.Append(2u, 3, Data(120, 9), 120);
         Assert.Equal(1, c.Count);
-        Assert.Equal(Data(120, 9), c.TryRead(2, 3));
+        Assert.Equal(Data(120, 9), c.TryRead(2u, 3));
     }
 
     [Fact]
     public void CorruptBodyIsDetected()
     {
-        using (var c = AlbumContainer.Open(FilePath)) c.Append(0, 0, Data(1000, 1), 1000);
+        using (var c = AlbumContainer.Open(FilePath)) c.Append(0u, 0, Data(1000, 1), 1000);
         using (var fs = new FileStream(FilePath, FileMode.Open))
         {
             fs.Position = AlbumContainer.FileHeaderSize + AlbumContainer.RecordHeaderSize + 10;
@@ -85,8 +85,8 @@ public sealed class AlbumContainerTests : IDisposable
             fs.WriteByte(0x00);
         }
         using var reopened = AlbumContainer.Open(FilePath);
-        Assert.True(reopened.Contains(0, 0));
-        Assert.Null(reopened.TryRead(0, 0));
+        Assert.True(reopened.Contains(0u, 0));
+        Assert.Null(reopened.TryRead(0u, 0));
     }
 
     [Fact]
@@ -95,8 +95,8 @@ public sealed class AlbumContainerTests : IDisposable
         File.WriteAllText(FilePath, "bu bir albüm kabı değil");
         using var c = AlbumContainer.Open(FilePath);
         Assert.Equal(0, c.Count);
-        c.Append(0, 0, Data(10, 1), 10);
-        Assert.Equal(Data(10, 1), c.TryRead(0, 0));
+        c.Append(0u, 0, Data(10, 1), 10);
+        Assert.Equal(Data(10, 1), c.TryRead(0u, 0));
     }
 
     [Fact]

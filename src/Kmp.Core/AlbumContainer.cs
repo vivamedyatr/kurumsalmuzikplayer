@@ -10,8 +10,9 @@ namespace Kmp.Core;
 ///
 /// Biçim (little-endian):
 ///   dosya başı  8 bayt: "KMPA" + sürüm (u32 = 1)
-///   kayıt başı 20 bayt: "KMPS" + şarkı (u16) + parça (u16) + uzunluk (i32) + CRC-32 (u32) + ayrılmış (u32)
+///   kayıt başı 20 bayt: "KMPS" + şarkı kimliği (u32) + parça (u16) + ayrılmış (u16) + uzunluk (i32) + CRC-32 (u32)
 ///   kayıt gövdesi
+/// Şarkı kimliği şarkının sunucudaki yolundan türetilir (TrackId); albüme şarkı eklense de kaymaz.
 /// Yarım kalan son kayıt (elektrik kesintisi) açılışta kesilip atılır. Aynı parça yeniden eklenirse sonuncusu geçerli.
 /// Tek yazar (indirici), çok okuyucu (çalar).
 /// </summary>
@@ -51,12 +52,19 @@ public sealed class AlbumContainer : IDisposable
     public long Length { get { lock (_indexGate) return _length; } }
     public int Count { get { lock (_indexGate) return _index.Count; } }
 
-    public bool Contains(int track, int segment)
+    public bool Contains(uint track, int segment)
     {
         lock (_indexGate) return _index.ContainsKey(Key(track, segment));
     }
 
-    static long Key(int track, int segment) => ((long)track << 32) | (uint)segment;
+    static long Key(uint track, int segment) => ((long)track << 16) | (uint)segment;
+
+    /// <summary>Şarkının kaptaki kimliği: SHA-256(yol) ilk 4 bayt.</summary>
+    public static uint TrackId(string trackKey)
+    {
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        return BitConverter.ToUInt32(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(trackKey)), 0);
+    }
 
     void Load()
     {
@@ -75,10 +83,11 @@ public sealed class AlbumContainer : IDisposable
         {
             fs.Position = pos;
             if (!ReadExact(fs, head, RecordHeaderSize) || BitConverter.ToUInt32(head, 0) != RecordMagic) break;
-            int track = BitConverter.ToUInt16(head, 4), segment = BitConverter.ToUInt16(head, 6);
-            var len = BitConverter.ToInt32(head, 8);
+            var track = BitConverter.ToUInt32(head, 4);
+            int segment = BitConverter.ToUInt16(head, 8);
+            var len = BitConverter.ToInt32(head, 12);
             if (len < 0 || len > MaxRecord || pos + RecordHeaderSize + len > fs.Length) break;
-            _index[Key(track, segment)] = new Entry { Offset = pos + RecordHeaderSize, Length = len, Crc = BitConverter.ToUInt32(head, 12) };
+            _index[Key(track, segment)] = new Entry { Offset = pos + RecordHeaderSize, Length = len, Crc = BitConverter.ToUInt32(head, 16) };
             pos += RecordHeaderSize + len;
         }
         if (pos != fs.Length)
@@ -90,18 +99,17 @@ public sealed class AlbumContainer : IDisposable
     }
 
     /// <summary>Bir parçayı kabın sonuna ekler ve diske yazılmasını bekler.</summary>
-    public void Append(int track, int segment, byte[] data, int count)
+    public void Append(uint track, int segment, byte[] data, int count)
     {
-        if (track < 0 || track > ushort.MaxValue || segment < 0 || segment > ushort.MaxValue)
-            throw new ArgumentOutOfRangeException(nameof(track));
+        if (segment < 0 || segment > ushort.MaxValue) throw new ArgumentOutOfRangeException(nameof(segment));
         if (count < 0 || count > MaxRecord || count > data.Length) throw new ArgumentOutOfRangeException(nameof(count));
         var crc = Crc32.Compute(data, 0, count);
         var head = new byte[RecordHeaderSize];
         Put(head, 0, RecordMagic);
-        Put16(head, 4, track);
-        Put16(head, 6, segment);
-        Put(head, 8, (uint)count);
-        Put(head, 12, crc);
+        Put(head, 4, track);
+        Put16(head, 8, segment);
+        Put(head, 12, (uint)count);
+        Put(head, 16, crc);
         lock (_writeGate)
         {
             _writer ??= OpenWriter();
@@ -134,7 +142,7 @@ public sealed class AlbumContainer : IDisposable
     }
 
     /// <summary>Parçayı okur; yoksa ya da bozuksa (CRC tutmuyor) null.</summary>
-    public byte[]? TryRead(int track, int segment)
+    public byte[]? TryRead(uint track, int segment)
     {
         Entry e;
         lock (_indexGate)

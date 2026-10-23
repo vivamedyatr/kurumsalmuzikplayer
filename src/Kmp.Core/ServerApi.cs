@@ -17,6 +17,9 @@ public static class ServerApi
 
     static readonly HttpClient Http = Create();
 
+    /// <summary>Medya (Worker) için: parçalar ~1 MB, yavaş hatta uzun sürebilir.</summary>
+    public static readonly HttpClient Media = CreateMedia();
+
     public sealed class Result
     {
         public int Status { get; set; }
@@ -31,6 +34,14 @@ public static class ServerApi
         var h = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
         h.DefaultRequestHeaders.Add("X-App-Version", AppInfo.Version);
         h.DefaultRequestHeaders.Add("X-App", "kmp");
+        h.DefaultRequestHeaders.UserAgent.ParseAdd($"KurumsalMuzikPlayer/{AppInfo.Version.Split('-')[0]}");
+        return h;
+    }
+
+    static HttpClient CreateMedia()
+    {
+        ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+        var h = new HttpClient { Timeout = TimeSpan.FromSeconds(120) };
         h.DefaultRequestHeaders.UserAgent.ParseAdd($"KurumsalMuzikPlayer/{AppInfo.Version.Split('-')[0]}");
         return h;
     }

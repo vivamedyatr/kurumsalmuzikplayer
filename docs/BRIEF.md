@@ -97,20 +97,26 @@ KurumsalMuzikPlayer.exe  (motor; görünmez, tepside)
 yeni, rastgele görünen dosya). Fidye yazılımları tam olarak bunu yapar; davranış korumaları bu deseni yakalar.
 
 **Çözüm:**
-1. **Sunucu (Worker) şifreler.** Program parçayı istediğinde Worker onu **paket anahtarıyla** AES-CTR ile şifreleyip
-   gönderir. Program bilgisayarda hiç şifreleme yapmaz; gelen baytları olduğu gibi yazar.
+1. **Sunucu (Worker) şifreler.** Program parçayı istediğinde Worker onu ~~paket anahtarıyla~~ → **herkes için tek arşiv
+   anahtarıyla** (karar Onur 23 Eki 2026: "her şube için ayrı şifrelemeye gerek yok") AES-256-CTR ile şifreleyip
+   `/e/` adresinden gönderir. Program bilgisayarda hiç şifreleme yapmaz; gelen baytları olduğu gibi yazar. Aynı parça
+   her yerde aynı şifreli baytlar olduğundan Cloudflare önbelleği şifreli hâli de tutar (Worker her parçayı bir kez şifreler).
 2. **Albüm başına tek dosya.** Bir albümün bütün şarkı parçaları tek bir kap dosyasına (`<albüm>.kmp`) art arda eklenir;
    başta küçük bir içindekiler tablosu. ~3.200 dosya yerine akış başına ~50–150 dosya.
 3. **Şifre bellekte çözülür**, mpv'ye programın içindeki yerel akış üzerinden verilir (diske açık yazılmaz).
-4. **Anahtar:** cihaz kaydında/manifestte sunucudan gelir, DPAPI ile saklanır. Klasör başka bilgisayara kopyalansa
-   anahtar orada açılmaz → çalmaz (bugünkü koruma ile aynı).
+4. **Anahtar:** programın içinde durmaz; geçerli şube girişiyle manifestte (`media.archive`) gelir, DPAPI ile
+   `arsiv-anahtari.bin`'de saklanır (`paket.json`'a yazılmaz). Klasör başka bilgisayara kopyalansa anahtar orada
+   açılmaz; o bilgisayar ancak geçerli bir şube girişiyle anahtarı alabilir. `MEDIA_TOKEN_SECRET`'tan türetilir
+   (yeni gizli bilgi yok); anahtar sürümü (`v1`) değişirse arşiv bir kez yeniden iner (`arsiv\<sürüm>\`).
 
 **Neden güvenli:** ses dosyaları zaten rastgele görünür; şüpheli olan, bir programın yerelde okuyup-şifreleyip-yazması
 ve dosya sayısıdır. A ikisini de ortadan kaldırır (Spotify ve Steam önbellekleri de böyle çalışır).
 
-**Sunucu tarafı (web projesinde, Onur onayıyla — §7):** Worker'a "şifreli ver" kipi; anahtar Worker gizlisinde, imzalı
-adreste paket kimliği. Cloudflare önbelleği şifresiz parçayı tutar; şifreleme her istekte Worker'da yapılır (CTR hızlı,
-ücretsiz plan CPU sınırına dikkat — Faz 2'de ölçülür).
+**Sunucu tarafı (web projesinde, Onur onayıyla — §7):** yazıldı ve yerelde denendi (web `7ce81e9`, 23 Eki 2026;
+`src/lib/archive-crypto.ts`, `worker/src/index.ts`). Canlıya yayın ayrı onayla. Worker ücretsiz plan CPU sınırı canlıda ölçülür.
+
+**Çalma:** program içinde sadece bu bilgisayardan erişilen (127.0.0.1, rastgele oturum adresli) küçük bir adres her
+şarkıyı mpv'ye HLS listesi olarak verir; parçalar istendiği anda kaptan okunup bellekte çözülür.
 
 ## 6. Sunucu API'si (hazır, değişmez)
 
@@ -172,7 +178,7 @@ açıkken 2 saat çalışır.
 
 - [ ] Faz 0 — İskelet ve kanıt deneyi (iskelet hazır, 23 Eki 2026: motor/pencere/mpv ayrı süreç, bekçiler denendi — pencere donunca 15 sn'de yeniden açılır, mpv çökünce 2 sn'de kaldığı yerden sürer, motor çökünce mpv de kapanır ve pencere motoru ~10 sn'de yeniden başlatır; ilk dayanıklılık denemesi Onur'un Kaspersky + Acronis'li bilgisayarında 9 dk, 0,41 GB albüm kabı yazımı: donma yok, Windows 1000/1002 kaydı yok, antivirüs uyarısı yok — 2.x bu bilgisayarda 0–7 dk içinde donuyordu; 24 saatlik kanıt bekliyor)
 - [ ] Faz 1 — Giriş ve cihaz (yapıldı, 23 Eki 2026: kurulum dosyası, giriş ekranı, cihaz kaydı DPAPI ile, 15 dk'da bir durum sorgusu, düşme, süre dolması, Windows'la başlama; yerel sunucuyla uçtan uca ve kur/güncelle/kaldır denendi. Onur'un Windows 7 ve 11 kanıtı bekliyor)
-- [ ] Faz 2 — İndirme ve arşiv
+- [ ] Faz 2 — İndirme ve arşiv (program tarafı yapıldı ve yerel sunucu + yerel Worker ile denendi, 23 Eki 2026: şifreli indirme, albüm kapları, yarıda kesilip devam, arşivden çalma. Kanıt için web + Worker canlıya yayınlanmalı — onay bekliyor)
 - [ ] Faz 3 — Çalma, anonslar, internetsiz 7 gün
 - [ ] Faz 4 — Akış değişimi, paket döngüsü, güncelleme
 - [ ] Faz 5 — Mağazada deneme ve dağıtım

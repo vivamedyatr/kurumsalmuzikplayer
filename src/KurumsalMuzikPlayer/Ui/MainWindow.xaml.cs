@@ -89,6 +89,7 @@ public partial class MainWindow : Window
         NoticeText.Visibility = screen == "player" && notice != null ? Visibility.Visible : Visibility.Collapsed;
         ExpiredText.Text = notice ?? "Hizmet süreniz doldu. Uzatmak için Viva Medya ile iletişime geçin.";
 
+        ApplyLibrary(s["library"] as JObject);
         TitleText.Text = (string?)s["title"] ?? "—";
         SubText.Text = (string?)s["sub"] ?? "";
         StatusText.Text = (string?)s["status"] ?? "";
@@ -107,6 +108,24 @@ public partial class MainWindow : Window
             _applyingState = false;
         }
         VolumeText.Text = ((int)VolumeSlider.Value).ToString();
+    }
+
+    void ApplyLibrary(JObject? lib)
+    {
+        LibraryText.Visibility = lib != null ? Visibility.Visible : Visibility.Collapsed;
+        if (lib == null) return;
+        var total = (int?)lib["total"] ?? 0;
+        var done = (int?)lib["done"] ?? 0;
+        var percent = total > 0 ? 100 * done / total : 0;
+        var message = (string?)lib["message"];
+        LibraryText.Text = (string?)lib["state"] switch
+        {
+            "ready" => $"Arşiv hazır · {total} parça · son kontrol {(string?)lib["checkedAt"] ?? "—"}",
+            "downloading" => $"Arşiv iniyor %{percent} ({done}/{total} parça, en fazla {((int?)lib["speedKbps"] ?? 0) / 1000} Mbps); yayın etkilenmez",
+            "starting" => "Arşiv açılıyor…",
+            _ => $"Arşiv %{percent} · {message}",
+        };
+        LibraryText.Foreground = (string?)lib["state"] is "offline" or "disk-full" ? new SolidColorBrush(Color.FromRgb(0xE8, 0xB0, 0x4A)) : (Brush)FindResource("Muted");
     }
 
     void ShowScreen(string screen)
