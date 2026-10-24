@@ -12,6 +12,7 @@
         <SolidColorBrush x:Key="Muted" Color="#8C8983" />
         <SolidColorBrush x:Key="Red" Color="#E3262B" />
         <SolidColorBrush x:Key="Line" Color="#2A2A30" />
+        <SolidColorBrush x:Key="Warn" Color="#E8B04A" />
         <Style x:Key="FlatButton" TargetType="Button">
             <Setter Property="Foreground" Value="#F2EFE9" />
             <Setter Property="Background" Value="#18181C" />
@@ -31,6 +32,31 @@
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- Üstteki sekmeler: sade yazı, seçili olan beyaz -->
+        <Style x:Key="Tab" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#8C8983" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="16,0,0,0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border Background="Transparent" Padding="0,2">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Foreground" Value="#F2EFE9" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#F2EFE9" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -57,19 +83,27 @@
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Foreground" Value="#8C8983" />
         </Style>
+        <Style x:Key="Scroll" TargetType="ScrollViewer">
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+        </Style>
     </Window.Resources>
 
-    <Grid Margin="26,18,26,14">
+    <Grid Margin="26,16,26,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Üst: yayında + saat, sağda hesap · şube -->
+        <!-- Üst: yayında + saat; sağda sekmeler -->
         <DockPanel Grid.Row="0">
-            <TextBlock x:Name="BranchText" DockPanel.Dock="Right" FontSize="11" Foreground="{StaticResource Muted}"
-                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="380" />
+            <StackPanel x:Name="Tabs" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <RadioButton x:Name="TabNow" Content="ÇALIYOR" GroupName="tab" IsChecked="True" Style="{StaticResource Tab}" Checked="Tab_Checked" />
+                <RadioButton x:Name="TabHistory" Content="GEÇMİŞ" GroupName="tab" Style="{StaticResource Tab}" Checked="Tab_Checked" />
+                <RadioButton x:Name="TabAnn" Content="ANONSLAR" GroupName="tab" Style="{StaticResource Tab}" Checked="Tab_Checked" />
+            </StackPanel>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <Ellipse x:Name="LiveDot" Width="8" Height="8" Fill="{StaticResource Red}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock x:Name="LiveText" Text="YAYINDA" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -91,7 +125,8 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Grid Width="150" Height="150">
+                <Grid Width="140" Height="140">
+                    <!-- Kapak yoksa plak; ortası tarzın rengi -->
                     <Ellipse>
                         <Ellipse.Fill>
                             <RadialGradientBrush>
@@ -101,18 +136,21 @@
                             </RadialGradientBrush>
                         </Ellipse.Fill>
                     </Ellipse>
-                    <Ellipse Width="46" Height="46" Fill="{StaticResource Red}" />
+                    <Ellipse x:Name="VinylLabel" Width="46" Height="46" Fill="{StaticResource Red}" />
                     <Ellipse Width="6" Height="6" Fill="#0B0B0D" />
+                    <Border x:Name="CoverBox" CornerRadius="4" Visibility="Collapsed" ClipToBounds="True">
+                        <Image x:Name="CoverImage" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
+                    </Border>
                 </Grid>
-                <StackPanel Grid.Column="1" Margin="28,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="DENEME AKIŞI" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Red}" />
-                    <TextBlock x:Name="TitleText" Text="—" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis" Margin="0,6,0,0" />
+                <StackPanel Grid.Column="1" Margin="26,0,0,0" VerticalAlignment="Center">
+                    <TextBlock x:Name="GenreText" Text="" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Red}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="TitleText" Text="—" FontSize="28" FontWeight="Bold" TextTrimming="CharacterEllipsis" Margin="0,6,0,0" />
                     <TextBlock x:Name="SubText" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
                 </StackPanel>
             </Grid>
 
             <!-- Şarkı ilerlemesi (sadece bilgi) -->
-            <Grid Grid.Row="1" Margin="0,8,0,0">
+            <Grid Grid.Row="1" Margin="0,6,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -124,7 +162,7 @@
             </Grid>
 
             <!-- Ses ve sonraki -->
-            <DockPanel Grid.Row="2" Margin="0,16,0,0">
+            <DockPanel Grid.Row="2" Margin="0,12,0,0">
                 <Button x:Name="NextButton" DockPanel.Dock="Right" Content="Sonraki ›" Style="{StaticResource FlatButton}" Click="Next_Click" />
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Ses" Foreground="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,12,0" />
@@ -135,13 +173,61 @@
             </DockPanel>
 
             <!-- Durum -->
-            <StackPanel Grid.Row="3" Margin="0,16,0,0">
-                <TextBlock x:Name="NoticeText" FontSize="12" Foreground="#E8B04A" TextWrapping="Wrap" Margin="0,0,0,3" Visibility="Collapsed" />
+            <StackPanel Grid.Row="3" Margin="0,10,0,0">
+                <TextBlock x:Name="NoticeText" FontSize="12" Foreground="{StaticResource Warn}" TextWrapping="Wrap" Margin="0,0,0,3" Visibility="Collapsed" />
                 <TextBlock x:Name="StatusText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
-                <TextBlock x:Name="LibraryText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0" Visibility="Collapsed" />
-                <TextBlock x:Name="ExperimentText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0" Visibility="Collapsed" />
+                <TextBlock x:Name="LibraryText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="Collapsed" />
+                <TextBlock x:Name="ExperimentText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="Collapsed" />
             </StackPanel>
         </Grid>
+
+        <!-- Geçmiş -->
+        <ScrollViewer x:Name="HistoryView" Grid.Row="1" Visibility="Collapsed" Style="{StaticResource Scroll}" Margin="0,12,0,4">
+            <ItemsControl x:Name="HistoryList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,0,0,7">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="92" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding At}" FontFamily="Consolas" FontSize="12" Foreground="#8C8983" />
+                            <StackPanel Grid.Column="1">
+                                <TextBlock TextTrimming="CharacterEllipsis">
+                                    <Run Text="{Binding Tag, Mode=OneWay}" Foreground="#E3262B" FontWeight="SemiBold" FontSize="11" />
+                                    <Run Text="{Binding Title, Mode=OneWay}" />
+                                </TextBlock>
+                                <TextBlock Text="{Binding Sub}" FontSize="11" Foreground="#8C8983" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Anons akışı (salt okunur) -->
+        <ScrollViewer x:Name="AnnView" Grid.Row="1" Visibility="Collapsed" Style="{StaticResource Scroll}" Margin="0,12,0,4">
+            <StackPanel>
+                <TextBlock x:Name="AnnNext" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" />
+                <ItemsControl x:Name="AnnPlans">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,10">
+                                <TextBlock Text="{Binding Label}" FontSize="11" FontWeight="SemiBold" Foreground="#E3262B" />
+                                <ItemsControl ItemsSource="{Binding Items}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock x:Name="AnnUpcoming" Foreground="#8C8983" FontSize="12" TextWrapping="Wrap" />
+            </StackPanel>
+        </ScrollViewer>
 
         <!-- Şube girişi -->
         <Grid x:Name="LoginView" Grid.Row="1" Visibility="Collapsed" VerticalAlignment="Center">
@@ -154,7 +240,7 @@
                 <TextBlock Text="Şube girişi" FontSize="26" FontWeight="Bold" />
                 <TextBlock Text="Kurumsal Müzik Net kullanıcı adınız, şifreniz ve bu mağazanın şube adı."
                            Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0" />
-                <TextBlock x:Name="LoginNotice" Foreground="#E8B04A" TextWrapping="Wrap" Margin="0,14,0,0" Visibility="Collapsed" />
+                <TextBlock x:Name="LoginNotice" Foreground="{StaticResource Warn}" TextWrapping="Wrap" Margin="0,14,0,0" Visibility="Collapsed" />
             </StackPanel>
             <StackPanel Grid.Column="2" VerticalAlignment="Center">
                 <TextBlock Text="KULLANICI ADI" Style="{StaticResource Label}" />
@@ -169,7 +255,7 @@
             </StackPanel>
         </Grid>
 
-        <!-- Hizmet süresi doldu -->
+        <!-- Yayın durdu (hizmet süresi doldu) -->
         <Grid x:Name="ExpiredView" Grid.Row="1" Visibility="Collapsed">
             <StackPanel Width="420" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock Text="Yayın durdu" FontSize="24" FontWeight="Bold" />
@@ -177,13 +263,27 @@
             </StackPanel>
         </Grid>
 
+        <!-- Gün bandı: akışın saat dilimleri (sadece görüntü) -->
+        <Grid x:Name="DayBandBox" Grid.Row="2" Margin="0,10,0,0" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="22" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid x:Name="DayBand" ClipToBounds="True" />
+            <Canvas x:Name="DayMarker" IsHitTestVisible="False">
+                <Rectangle x:Name="NowLine" Width="2" Height="22" Fill="#F2EFE9" />
+            </Canvas>
+            <Grid x:Name="DayHours" Grid.Row="1" Margin="0,2,0,0" />
+        </Grid>
+
         <!-- Alt -->
-        <DockPanel Grid.Row="2" Margin="0,12,0,0">
+        <DockPanel Grid.Row="3" Margin="0,8,0,0">
             <TextBlock x:Name="VersionText" DockPanel.Dock="Right" FontSize="11" Foreground="{StaticResource Muted}" />
-            <TextBlock FontSize="11">
+            <TextBlock DockPanel.Dock="Left" FontSize="11">
                 <Hyperlink NavigateUri="https://vivamedya.com" RequestNavigate="Link_RequestNavigate"
                            Foreground="{StaticResource Muted}" TextDecorations="{x:Null}">by Viva Medya</Hyperlink>
             </TextBlock>
+            <TextBlock x:Name="BranchText" FontSize="11" Foreground="{StaticResource Muted}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="16,0" />
         </DockPanel>
     </Grid>
 </Window>

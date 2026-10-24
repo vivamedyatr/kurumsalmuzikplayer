@@ -21,11 +21,12 @@ sealed class EngineHost : ApplicationContext
     const int StallWarnMs = 3000;
 
     readonly NotifyIcon _tray;
-    readonly TestMusicPlayer _music;
+    readonly FlowPlayer _music;
     readonly Session _session = new();
     readonly object _libraryGate = new();
     Library? _library;
     LocalMediaServer? _media;
+    Announcer? _announcer;
     readonly Control _mainThread = new();
     readonly UiSupervisor _ui;
     readonly ArchiveExperiment? _experiment;
@@ -61,7 +62,7 @@ sealed class EngineHost : ApplicationContext
         };
         _tray.DoubleClick += (_, _) => _ui.Show();
 
-        _music = new TestMusicPlayer(mpvExe, _settings.Volume, PlayItems);
+        _music = new FlowPlayer(mpvExe, _settings.Volume, () => { lock (_libraryGate) return _library; }, () => { lock (_libraryGate) return _media; });
 
         _ui.CommandReceived += OnUiCommand;
         _ui.ShowRequested += () => _ui.Show();
@@ -102,7 +103,6 @@ sealed class EngineHost : ApplicationContext
     {
         var m = new ContextMenuStrip();
         m.Items.Add("Pencereyi aç", null, (_, _) => _ui.Show());
-        m.Items.Add("Deneme müzik klasörünü aç", null, (_, _) => OpenFolder(AppPaths.TestMusicDir));
         m.Items.Add("Günlük klasörünü aç", null, (_, _) => OpenFolder(AppPaths.LogDir));
         m.Items.Add(new ToolStripSeparator());
         m.Items.Add("Çıkış", null, (_, _) => Shutdown());
@@ -131,13 +131,13 @@ sealed class EngineHost : ApplicationContext
                 _music.Start();
                 break;
             case Session.Screen.Login:
+                _music.Stop();
                 StopLibrary();
-                _music.Stop("Giriş bekleniyor");
                 _ui.Show();
                 break;
             case Session.Screen.Expired:
+                _music.Stop();
                 StopLibrary();
-                _music.Stop("Hizmet süresi doldu");
                 _ui.Show();
                 break;
         }
@@ -150,10 +150,14 @@ sealed class EngineHost : ApplicationContext
         {
             if (_library != null) return;
             _library = new Library(() => _session.Token, msg => System.Threading.Tasks.Task.Run(() => _session.ReportRemoved(msg)));
-            _library.Changed += () => System.Threading.Tasks.Task.Run(_music.Refresh);
             _media = new LocalMediaServer(_library);
             _media.Start();
             _library.Start();
+            _announcer = new Announcer(() => _session.Token, msg => System.Threading.Tasks.Task.Run(() => _session.ReportRemoved(msg)));
+            _announcer.Break += items => System.Threading.Tasks.Task.Run(() => _music.PlayBreak(items));
+            _music.Announcer = _announcer;
+            _announcer.Start();
+            PlayLog.StartSending(() => _session.Token);
         }
     }
 
@@ -161,50 +165,23 @@ sealed class EngineHost : ApplicationContext
     {
         Library? lib;
         LocalMediaServer? media;
+        Announcer? announcer;
         lock (_libraryGate)
         {
             lib = _library;
             media = _media;
+            announcer = _announcer;
             _library = null;
             _media = null;
+            _announcer = null;
         }
+        _music.Announcer = null;
+        announcer?.Dispose();
+        PlayLog.StopSending();
         lib?.Stop();
         media?.Dispose();
     }
 
-    /// <summary>
-    /// Çalınacaklar. Faz 2: arşivden inmiş bütün şarkılar (şu anki tarzınkiler önce); arşiv boşsa deneme klasörü.
-    /// Faz 3'te akışa (saat dilimlerine) göre çalan gerçek çalar gelir.
-    /// </summary>
-    List<PlayItem> PlayItems()
-    {
-        Library? lib;
-        LocalMediaServer? media;
-        lock (_libraryGate)
-        {
-            lib = _library;
-            media = _media;
-        }
-        var m = lib?.Current;
-        if (lib != null && media != null && m != null)
-        {
-            var order = m.GenreOrder(lib.IstanbulNow().Hour);
-            var albums = m.Albums.ToDictionary(a => a.Id, a => a.Title);
-            var genres = m.Genres.ToDictionary(g => g.Slug, g => g.Name);
-            var items = lib.ReadyTracks()
-                .OrderBy(t => order.IndexOf(t.Genre))
-                .Select(t => new PlayItem
-                {
-                    Url = media.TrackUrl(t),
-                    Title = t.Title,
-                    Sub = $"{(albums.TryGetValue(t.Album, out var a) ? a : "")} · {(genres.TryGetValue(t.Genre, out var g) ? g : t.Genre)}",
-                    FromArchive = true,
-                })
-                .ToList();
-            if (items.Count > 0) return items;
-        }
-        return TestMusicPlayer.TestFolderItems();
-    }
 
     void OnUiCommand(JObject m)
     {
@@ -232,7 +209,7 @@ sealed class EngineHost : ApplicationContext
                 _settings.Save();
                 break;
             case "next":
-                _music.Next();
+                _music.Skip();
                 break;
         }
     }
@@ -244,8 +221,21 @@ sealed class EngineHost : ApplicationContext
             var s = _music.Snapshot();
             s.Merge(_session.Describe());
             Library? lib;
-            lock (_libraryGate) lib = _library;
+            Announcer? announcer;
+            lock (_libraryGate)
+            {
+                lib = _library;
+                announcer = _announcer;
+            }
             s["library"] = lib?.Describe();
+            s["schedule"] = announcer?.Schedule();
+            s["history"] = new JArray(History.Recent(40).Select(h => new JObject
+            {
+                ["at"] = Clock.Istanbul(h.At).ToString("dd.MM HH:mm"),
+                ["kind"] = h.Kind,
+                ["title"] = h.Title,
+                ["sub"] = h.Sub,
+            }));
             s["t"] = "state";
             s["exp"] = _experiment?.Summary();
             _ui.SendState(s);
@@ -295,8 +285,10 @@ sealed class EngineHost : ApplicationContext
         _reportTimer.Dispose();
         _ui.CloseUi();
         _experiment?.Stop();
-        StopLibrary();
         _music.Stop();
+        StopLibrary();
+        PlayLog.SaveNow();
+        History.Save();
         _tray.Visible = false;
         _tray.Dispose();
         ExitThread();

@@ -123,6 +123,17 @@ public sealed class MpvClient : IDisposable
 
     public void Observe(int id, string property) => Command("observe_property", id, property);
 
+    public void Set(string property, object value) => Command("set_property", property, value);
+
+    /// <summary>Özelliği sorar; cevap gelmezse ya da hata olursa null.</summary>
+    public System.Threading.Tasks.Task<JToken?> GetAsync(string property, int timeoutMs = 3000)
+    {
+        var tcs = new System.Threading.Tasks.TaskCompletionSource<JToken?>();
+        Request(v => tcs.TrySetResult(v), "get_property", property);
+        System.Threading.Tasks.Task.Delay(timeoutMs).ContinueWith(_ => tcs.TrySetResult(null));
+        return tcs.Task;
+    }
+
     void Send(object[] args, Action<JToken?>? callback)
     {
         var ch = _channel;

@@ -30,7 +30,6 @@ public sealed class Library : IDisposable
     static readonly int SpeedKbps =
         int.TryParse(Environment.GetEnvironmentVariable("KMP_HIZ_KBPS"), out var k) && k > 0 ? k : 6000;
     static readonly byte[] KeyEntropy = Encoding.UTF8.GetBytes("Kurumsal Müzik Player · arşiv");
-    static readonly TimeZoneInfo Istanbul = FindIstanbul();
     /// <summary>Bilgisayara özel anahtarın sürümü (arsiv\c1\). Değişirse arşiv bir kez yeniden iner.</summary>
     const string LocalKeyId = "c1";
 
@@ -48,9 +47,9 @@ public sealed class Library : IDisposable
     string? _keyId;
     DeviceState _device = new();
     long _lastManifestMs = long.MinValue / 2;
-    long _clockOffsetMs;
     string? _cleanedFor;
     bool _coversFor;
+    long _coversTriedMs = -600_001;
 
     // Ekrana giden durum
     string _state = "starting";
@@ -143,8 +142,7 @@ public sealed class Library : IDisposable
     }
 
     /// <summary>İstanbul saati (sunucu saatine göre düzeltilmiş).</summary>
-    public DateTime IstanbulNow() =>
-        TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow.AddMilliseconds(Interlocked.Read(ref _clockOffsetMs)), Istanbul);
+    public DateTime IstanbulNow() => Clock.Istanbul().DateTime;
 
     public JObject Describe()
     {
@@ -191,12 +189,17 @@ public sealed class Library : IDisposable
                     backoff = Math.Min(backoff * 2, RetryMaxMs);
                     continue;
                 }
+                // Kapaklar küçük: paket gelir gelmez iner (ekranda hemen görünsün).
+                if (!_coversFor && _clock.ElapsedMilliseconds - _coversTriedMs > 600_000)
+                {
+                    _coversTriedMs = _clock.ElapsedMilliseconds;
+                    _coversFor = SyncCovers(m);
+                }
                 var job = Next(m);
                 if (job == null)
                 {
                     Recount();
                     SetState("ready", null);
-                    if (!_coversFor) _coversFor = SyncCovers(m);
                     if (_cleanedFor != m.Version)
                     {
                         _cleanedFor = m.Version;
@@ -274,7 +277,7 @@ public sealed class Library : IDisposable
         return m != null && NowMs() > m.Media.ExpiresAt - 60_000;
     }
 
-    long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + Interlocked.Read(ref _clockOffsetMs);
+    static long NowMs() => Clock.Now();
 
     (Manifest.Track, int)? Next(Manifest m)
     {
@@ -391,9 +394,7 @@ public sealed class Library : IDisposable
             return;
         }
         var m = r.Body.ToObject<Manifest>()!;
-        var offset = m.ServerNow - DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        Interlocked.Exchange(ref _clockOffsetMs, offset);
-        if (Math.Abs(offset) > 120_000) Log.Warn($"Bilgisayar saati sunucudan farklı: {offset / 60_000} dk");
+        Clock.ServerSeen(m.ServerNow);
 
         m.Media.Archive = null; // sunucunun eski ortak anahtarı kullanılmıyor (karar 24 Eki 2026); paket.json'a yazılmaz
 
@@ -412,6 +413,7 @@ public sealed class Library : IDisposable
         {
             Log.Info($"Yeni paket: {m.Version}, {m.Albums.Count} albüm, {m.Tracks.Count} şarkı");
             _coversFor = false;
+            _coversTriedMs = -600_001;
             Changed?.Invoke();
         }
     }
@@ -617,9 +619,4 @@ public sealed class Library : IDisposable
         return ok;
     }
 
-    static TimeZoneInfo FindIstanbul()
-    {
-        try { return TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time"); }
-        catch { return TimeZoneInfo.CreateCustomTimeZone("Istanbul", TimeSpan.FromHours(3), "Istanbul", "Istanbul"); }
-    }
 }

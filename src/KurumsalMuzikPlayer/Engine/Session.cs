@@ -14,8 +14,8 @@ namespace KurumsalMuzikPlayer.Engine;
 /// </summary>
 sealed class Session
 {
-    // Faz 1: düşme en geç 15 dk'da fark edilsin diye durum 15 dk'da bir sorulur. Faz 3'te bu işi 15 dk'lık anons
-    // sorgusu üstlenir; durum sorgusu kararlaştırılan sıklığa (günde bir) iner.
+    // Lisans günde bir sorulur (karar 9 Eki 2026); başarısızsa 15 dk'da bir yeniden denenir. Düşme (401) zaten 15 dk'da
+    // bir gelen anons sorgusuyla en geç 15 dk'da fark edilir.
     // KMP_DURUM_SN: sadece deneme için (düşmeyi beklemeden görmek).
     static readonly int CheckEveryMs =
         int.TryParse(Environment.GetEnvironmentVariable("KMP_DURUM_SN"), out var sec) && sec > 0 ? sec * 1000 : 15 * 60_000;
@@ -30,6 +30,7 @@ sealed class Session
     bool _expired;
     bool _online;
     DateTime? _checkedAt;
+    DateTime? _lastOk;
     Timer? _timer;
 
     /// <summary>Ekran (giriş / çalar / süre doldu) değişti.</summary>
@@ -59,6 +60,7 @@ sealed class Session
             _expired = false;
             _notice = message ?? "Bu cihaz panelden kaldırıldı. Yeniden giriş yapın.";
             DeviceStore.Clear();
+            Clock.Reset();
         }
         Log.Warn("Sunucu cihazı tanımadı (401): " + message);
         ScreenChanged?.Invoke(Current);
@@ -69,7 +71,12 @@ sealed class Session
         var d = DeviceStore.Load();
         lock (_gate) _device = d;
         Log.Info(d == null ? "Kayıtlı şube yok; giriş bekleniyor" : $"Şube: {d.AccountName} · {d.BranchName} ({d.Code})");
-        _timer = new Timer(_ => _ = CheckAsync(), null, 0, CheckEveryMs);
+        _timer = new Timer(_ =>
+        {
+            bool due;
+            lock (_gate) due = !_online || _lastOk == null || DateTime.Now - _lastOk.Value > TimeSpan.FromHours(24);
+            if (due) _ = CheckAsync();
+        }, null, 0, CheckEveryMs);
     }
 
     public async Task CheckAsync()
@@ -90,6 +97,7 @@ sealed class Session
                     _expired = false;
                     _notice = r.Error ?? "Bu cihaz panelden kaldırıldı. Yeniden giriş yapın.";
                     DeviceStore.Clear();
+                    Clock.Reset();
                     Log.Warn("Sunucu cihazı tanımadı (401): " + _notice);
                 }
                 else if (r.Status is 200 or 403)
@@ -98,6 +106,8 @@ sealed class Session
                     _expired = r.Status == 403 && (bool?)r.Body["expired"] == true;
                     d.ServiceEndsAt = (long?)r.Body["account"]?["serviceEndsAt"] ?? d.ServiceEndsAt;
                     d.LastOkAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    _lastOk = DateTime.Now;
+                    Clock.ServerSeen((long?)r.Body["serverNow"], d.ServiceEndsAt);
                     if (_expired) _notice = r.Error;
                     DeviceStore.Save(d);
                 }
@@ -151,6 +161,7 @@ sealed class Session
                 LastOkAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             };
             DeviceStore.Save(d);
+            Clock.ServerSeen(null, d.ServiceEndsAt);
             var takenOver = (bool?)r.Body["takenOver"] == true;
             lock (_gate)
             {
@@ -158,6 +169,7 @@ sealed class Session
                 _expired = false;
                 _online = true;
                 _checkedAt = DateTime.Now;
+                _lastOk = DateTime.Now;
                 _notice = takenOver ? "Bu şube adıyla açık olan diğer bilgisayardaki yayın durdu; yayın artık bu bilgisayarda." : null;
             }
             Log.Info($"Giriş yapıldı: {d.AccountName} · {d.BranchName} ({d.Code}){(takenOver ? ", şube devralındı" : "")}");

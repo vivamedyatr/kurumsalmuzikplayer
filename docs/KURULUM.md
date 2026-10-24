@@ -50,7 +50,9 @@ gerekir; ikisi de sadece bilgisayardaki taklit R2'yi kullanır.
 - `arsiv-anahtari.bin` — bu bilgisayara özel arşiv anahtarı (ilk açılışta üretilir, DPAPI)
 - `arsiv\c1\<albüm>.kmp` — albüm kapları (parçalar bellekte şifrelenip eklenir)
 - `kapak\<albüm>.jpg` — albüm kapakları
-- `deneme-muzik\` — Faz 0: buraya konan ses dosyaları karışık ve döngüde çalar
+- `anons\<anons>.mp3`, `anonslar.json`, `anons-torba.json` (karışık planların sırası), `anons-gonderilecek.json` (internet gelince gidecek çalma kayıtları)
+- `durum.json` — saat farkı, son başarılı bağlantı, hizmet son günü (7 gün kuralı)
+- `gecmis.json` — çalma geçmişi (7 gün) · `kayit-kuyrugu.json` — yayın kaydı kuyruğu (15 dk'da bir gider)
 - `deneme-arsiv\` — Faz 0 dayanıklılık deneyinin yazdığı sahte arşiv (her deneyde silinip baştan yazılır)
 
 ## Faz 0 dayanıklılık deneyi

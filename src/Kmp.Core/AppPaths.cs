@@ -15,7 +15,6 @@ public static class AppPaths
 
     public static string DataDir => Ensure(Root);
     public static string LogDir => Ensure(Path.Combine(Root, "gunluk"));
-    public static string TestMusicDir => Ensure(Path.Combine(Root, "deneme-muzik"));
     public static string TestArchiveDir => Path.Combine(Root, "deneme-arsiv");
     public static string SettingsFile => Path.Combine(Ensure(Root), "ayarlar.json");
 
