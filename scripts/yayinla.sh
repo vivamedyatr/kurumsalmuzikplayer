@@ -36,6 +36,6 @@ ssh -i $KEY $HOST "set -e; sudo mkdir -p $DIR; cd $DIR; sudo install -m 644 '$TM
 echo "== kontrol"
 curl -fsS "https://kurumsalmuzik.net/indir/kmp/latest.json?t=$(date +%s)"
 echo
-echo "sabit adres: $(curl -sI https://kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe | grep -i content-length | tr -d '')"
+echo "sabit adres: $(curl -sI https://kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe | grep -i content-length | tr -d "[:cntrl:]")"
 echo
 echo "== yayında: $V (kurulu 1.0 programları en geç 4 saat içinde indirir, yeniden açılışta kurar)"
