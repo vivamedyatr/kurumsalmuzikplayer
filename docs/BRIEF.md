@@ -37,10 +37,19 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 | 4 | Geçiş | **Elle kurulum.** Müşteriler henüz Kurumsal Müzik Net'e taşınmadı; 2.x'ten otomatik geçiş yapılmaz. |
 | 5 | Ad | Her yerde **"Kurumsal Müzik Player"**. ~~Sürüm sadece pencerenin sağ altında; programda vivamedya.com bağlantısı.~~ → 1.0.0'da (yeni arayüz, 25 Eki 2026): sürüm sol menünün altında ("Sürüm 1.0.0") ve giriş ekranında; marka "MÜZİK · BY VIVA MEDYA"; giriş ekranında "Viva Medya · vivamedya.com" **yazısı** var ama tıklanır bağlantı yok (sonraki sürüm adayı, §9). |
 
+### 2.1a 1.0.1 (karar Onur, 25 Eki 2026)
+
+| # | Konu | Karar |
+|---|---|---|
+| 6 | Hesaptan çıkış | Sol rayda **"Çıkış yap"** (onay penceresiyle). Şube kaydı bu bilgisayardan silinir, müzik durur, giriş ekranı gelir. Sunucudaki cihaz kaydı durur (aynı şube adıyla girilince devralınır, hak harcanmaz); inen arşiv kalır. Bekleyen yayın kaydı çıkıştan önce gönderilir, gönderilemeyen silinir. |
+| 7 | Duraklat | Alt çubuktaki kırmızı düğme **duraklat / devam**. Müzik aynı şarkının aynı saniyesinde bekler; devam edince oradan sürer (bu arada dilim değiştiyse yeni tarza geçer). Duraklatılmışken anons çalmaz, "Sonraki" kapalı, yayın kaydına "durdu" yazılır. Program yeniden açılınca çalar (duraklatma kalıcı değil). Anons sırasında duraklatılamaz. |
+| 8 | Destek | Web'de **`kurumsalmuzik.net/destek`** (WhatsApp +90 212 807 05 87, info@vivamedya.com). Programda sol rayda, giriş ekranında ve "Yayın durdu" ekranında "Destek ↗". |
+| 9 | Ad | "Bugünkü akış" → **"Yayın akışı"** (her gün aynı akış çalar; "bugünkü" yarın başka akış varmış gibi anlaşılıyordu). |
+
 ### 2.2 Eski BRIEF'ten aynen geçen kararlar (özet; ayrıntı orada)
 
 - **Platform:** Windows 7 SP1, 8, 8.1, 10, 11 — 64 bit. Tek program, tek kurulum dosyası, kullanıcı bazlı kurulum (yönetici izni istemez).
-- **Arayüz:** ses aç/kıs, sonraki şarkı (10 sn'de bir, anons sırasında kapalı), çalma geçmişi, "Aylık yeni müzik" anahtarı. Durdur yok; akış programda düzenlenmez ("Akışı düzenle" tarayıcıda açılır).
+- **Arayüz:** ses aç/kıs, sonraki şarkı (10 sn'de bir, anons sırasında kapalı), çalma geçmişi, "Aylık yeni müzik" anahtarı. ~~Durdur yok~~ → 1.0.1'de duraklat/devam var (§2.1a #7); akış programda düzenlenmez ("Akışı düzenle" tarayıcıda açılır).
 - **Akış:** sadece tarz akışı; hesabın ortak "Offline akışı"; 7 günde bir değişir (sunucuda).
 - **Paket:** akış başına 6 GB, tarz başına en fazla 16 saat, albüm başına ilk 40 şarkı, 30 günde en fazla 5 albüm değişir (sunucuda).
 - **İndirme:** en fazla 6 Mbps; önce çalan tarz, sonra sıradaki, sonra diğerleri; kesilip devam eder; inerken çalar (tarz en az 3 şarkısı inince).
@@ -200,8 +209,8 @@ düzeltilir. ~~Gerçek bir mağazada bir hafta~~; indirme adresinin 1.0'a çevri
 5. **Kod imzalama:** antivirüs/SmartScreen sorunu çıkarsa yeniden değerlendirilir (§2.1 #3).
 
 **Programda olmayanlar — sonraki sürüm adayları** (Onur'un testlerine göre sıralanır; her biri ayrı onayla):
-- Giriş ekranında ya da menüde tıklanır vivamedya.com bağlantısı (§2.1 #5).
-- Sessize alma düğmesi (bugün sadece ses kaydırıcısı var).
+- ~~Giriş ekranında ya da menüde tıklanır vivamedya.com bağlantısı (§2.1 #5).~~ → 1.0.1'de yerine "Destek ↗" (kurumsalmuzik.net/destek) geldi.
+- ~~Sessize alma düğmesi.~~ → 1.0.1'de duraklat/devam (§2.1a #7).
 - Windows 7'de TLS 1.2 / kök sertifika eksikse kurulumda ya da girişte açık bir uyarı (§3).
 - "Günlüğü gönder" (uzaktan destek için günlüğü sunucuya yükleme, §4).
 
@@ -221,6 +230,8 @@ Kanıt senaryoları mağaza denemesi yerine Onur'un kendi testlerinde (karar 25 
 - [x] Faz 3 — Çalma, anonslar, internetsiz 7 gün (yapıldı, 24 Eki 2026, 1.0.0-faz3: saat dilimine göre tarz, inmemiş tarz yerine inmiş olan, anons kuşağı ikinci mpv'de ve müzik kaldığı saniyeden sürer, anons kuralları web'le birebir ve aynı testlerle, 7 gün kuralı, geçmiş, yayın kaydı; pencerede kapak, gün bandı, Geçmiş ve Anonslar sekmeleri. Canlıda Onur'un bilgisayarında çalışıyor; kanıt senaryosu bekliyor)
 - [x] Faz 4 — Akış değişimi, paket döngüsü, güncelleme (program tarafı yapıldı, 24 Eki 2026, 1.0.0-faz4.1: "Akışı düzenle" web'i açar ve paketi 2/5/10/20 dk sonra erken sorar; "Aylık yeni müzik" anahtarı; eski tarzlar yenisi inene kadar çalar, pakette olmayan albümler paket tamamen inince silinir; kendini güncelleme yerel adresle denendi: arkada iner, SHA-256 doğrulanır, yeniden açılışta ~10 sn'de kurulur ve program kendiliğinden açılır. İlk canlı yayın 24 Eki 2026: 1.0.0-faz4.1 (yapı 41), 25 Eki 2026: 1.0.0-faz5.1 (yapı 51, yeni arayüz) `/indir/kmp/`'de, SHA-256 doğrulandı; 2.x'in latest.yml'i ve sabit indirme adresi değişmedi. Kanıt senaryosu bekliyor)
 - [x] Faz 5 — Final sürüm 1.0.0 (25 Eki 2026, yapı 100, `/indir/kmp/`'de; sitedeki sabit indirme adresi de 1.0.0'ı veriyor; GitHub etiketi `v1.0.0`). Mağazada deneme yok (karar Onur); testler Onur'da, `docs/TEST-LISTESI.md`. Açık kararlar ve sonraki sürüm adayları §9'da.
+
+- [x] **1.0.1** (25 Eki 2026, yapı 101; Onur'un ilk istekleri): hesaptan çıkış, duraklat/devam, Destek bağlantısı, "Yayın akışı" adı (§2.1a). Derlendi, 21 test geçti; kurulum dosyası `dist\`'te. Yayın Onur onayıyla (önce web'de `/destek`).
 
 **Belgeler (25 Eki 2026'da güncellendi):** bu BRIEF; derleme ve deneme `docs/KURULUM.md`; test rehberi
 `docs/TEST-LISTESI.md`; sunucu, yayın ve mağaza kurulumu dahil her şey `../kurumsalmuzik/docs/KURULUM-KILAVUZU.html` §12

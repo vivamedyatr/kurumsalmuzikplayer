@@ -46,9 +46,10 @@ public partial class MainWindow : Window
         RecentEyebrow.Text = Visuals.Tracked("SON ÇALANLAR");
         LoginEyebrow.Text = Visuals.Tracked("KURUMSAL MÜZİK PLAYER");
         LiveTagText.Text = Visuals.Tracked("CANLI");
+        LogoutEyebrow.Text = Visuals.Tracked("HESAPTAN ÇIKIŞ");
         CoverGrain.Fill = Visuals.Grain;
         LoginGrain.Fill = Visuals.Grain;
-        VersionText.Text = $"Sürüm {AppInfo.Version}";
+        VersionText.Text = AppInfo.Version;
         LoginVersion.Text = $"{AppPaths.ProductName} {AppInfo.Version}";
         DateText.Text = DateTime.Now.ToString("dddd, d MMMM", Turkish);
 
@@ -189,14 +190,16 @@ public partial class MainWindow : Window
         var title = (string?)s["title"] ?? "—";
         var album = (string?)s["sub"] ?? "";
         var status = (string?)s["status"] ?? "";
+        var paused = (bool?)s["paused"] == true && gate == null;
 
         string eyebrow;
         if (gate != null) eyebrow = "YAYIN DURDU";
         else if (breakTitle != null) eyebrow = "ANONS ÇALIYOR";
+        else if (paused) eyebrow = "DURAKLATILDI";
         else if (genre == null) eyebrow = "YAYIN HAZIRLANIYOR";
         else eyebrow = $"ŞU AN ÇALIYOR · {slotHour:00}:00 DİLİMİ";
         LiveEyebrow.Text = Visuals.Tracked(eyebrow);
-        var red = gate == null;
+        var red = gate == null && !paused;
         LiveEyebrow.Foreground = red ? (Brush)FindResource("Vm") : (Brush)FindResource("Fg3");
         LiveDot.Fill = red ? (Brush)FindResource("Vm") : (Brush)FindResource("Fg3");
         LiveHalo.Visibility = red ? Visibility.Visible : Visibility.Collapsed;
@@ -208,6 +211,11 @@ public partial class MainWindow : Window
         if (gate != null)
         {
             NextText.Text = gate;
+            NextText.Foreground = (Brush)FindResource("Warn");
+        }
+        else if (paused)
+        {
+            NextText.Text = "Duraklatıldı. ▶ ile devam edince şarkı kaldığı saniyeden sürer.";
             NextText.Foreground = (Brush)FindResource("Warn");
         }
         else if (status != "Çalıyor")
@@ -233,7 +241,7 @@ public partial class MainWindow : Window
         BarThumbFallback.Background = Visuals.Gradient((string?)colors?["from"], (string?)colors?["to"]);
 
         BarTitle.Text = breakTitle != null ? "Anons: " + breakTitle : title;
-        BarSub.Text = gate ?? (genre != null ? $"{genre} · {slotHour:00}:00 dilimi" : status);
+        BarSub.Text = gate ?? (paused ? "Duraklatıldı" : genre != null ? $"{genre} · {slotHour:00}:00 dilimi" : status);
 
         _pos = breakTitle != null ? 0 : (double?)s["pos"] ?? 0;
         _dur = breakTitle != null ? 0 : (double?)s["dur"] ?? 0;
@@ -242,14 +250,18 @@ public partial class MainWindow : Window
         DrawProgress();
 
         var wait = (int?)s["skipWaitMs"] ?? 0;
-        NextButton.IsEnabled = breakTitle == null && wait == 0 && gate == null && genre != null;
+        NextButton.IsEnabled = breakTitle == null && wait == 0 && gate == null && genre != null && !paused;
+        _paused = paused;
+        PlayButton.IsEnabled = gate == null && breakTitle == null && (paused || (genre != null && (string?)s["title"] is { } t && t != "—"));
+        PlayIcon.Data = (Geometry)FindResource(paused ? "IconPlay" : "IconPause");
+        PlayIcon.Margin = new Thickness(paused ? 3 : 0, 0, 0, 0);
+        PlayButton.ToolTip = paused ? "Devam et (kaldığı yerden)" : "Duraklat";
         SkipWait.Text = wait > 0 ? ((wait + 999) / 1000).ToString() : "";
 
-        LiveTagText.Text = Visuals.Tracked(gate != null ? "DURDU" : breakTitle != null ? "ANONS" : "CANLI");
-        var tagBrush = gate != null ? (Brush)FindResource("Fg3") : (Brush)FindResource("Vm");
+        LiveTagText.Text = Visuals.Tracked(gate != null ? "DURDU" : paused ? "DURAKLATILDI" : breakTitle != null ? "ANONS" : "CANLI");
+        var tagBrush = gate != null || paused ? (Brush)FindResource("Fg3") : (Brush)FindResource("Vm");
         LiveTagText.Foreground = tagBrush;
         LiveTag.BorderBrush = tagBrush;
-        OnAir.Fill = gate != null ? (Brush)FindResource("Bg3") : (Brush)FindResource("Vm");
 
         var vol = (int?)s["vol"] ?? 0;
         if (DateTime.Now - _lastUserVolume > TimeSpan.FromSeconds(2) && Math.Abs(VolumeSlider.Value - vol) > 0.5)
@@ -272,7 +284,7 @@ public partial class MainWindow : Window
         return $"{(string?)slots.Last()["name"]} gece boyunca sürer · akış {(int?)first["hour"]:00}:00'de baştan başlar";
     }
 
-    // ===================== bugünkü akış şeridi =====================
+    // ===================== yayın akışı şeridi =====================
 
     void ApplyStrip(JObject s)
     {
@@ -437,7 +449,7 @@ public partial class MainWindow : Window
             default: RenderArchive(s); break;
         }
         if (force) PageScroll.ScrollToTop();
-        // Bugünkü akış: şu an çalan dilim görünür olsun.
+        // Yayın akışı: şu an çalan dilim görünür olsun.
         if (force && _flowNowRow != null)
         {
             var row = _flowNowRow;
@@ -463,7 +475,7 @@ public partial class MainWindow : Window
     void RenderFlow(JObject s)
     {
         _flowNowRow = null;
-        Header("AKIŞ", "Bugünkü akış", "Akış web sitesinden düzenlenir (soldaki \"Akışı düzenle\"); değişiklik en geç bir saatte buraya gelir.");
+        Header("AKIŞ", "Yayın akışı", "Her gün bu akış çalar. Web sitesinden düzenlenir (soldaki \"Akışı düzenle\"); değişiklik en geç bir saatte buraya gelir.");
         var slots = (s["slots"] as JArray)?.OfType<JObject>().OrderBy(o => (int?)o["hour"] ?? 0).ToList() ?? new List<JObject>();
         var genres = new Dictionary<string, JObject>();
         foreach (var g in ((s["archive"] as JObject)?["genres"] as JArray)?.OfType<JObject>() ?? Enumerable.Empty<JObject>())
@@ -640,6 +652,7 @@ public partial class MainWindow : Window
         PlayerScreen.Visibility = screen == "player" ? Visibility.Visible : Visibility.Collapsed;
         LoginScreen.Visibility = screen == "login" ? Visibility.Visible : Visibility.Collapsed;
         ExpiredScreen.Visibility = screen == "expired" ? Visibility.Visible : Visibility.Collapsed;
+        if (screen != "player") LogoutConfirm.Visibility = Visibility.Collapsed;
         if (screen == "login" && !wasLogin)
         {
             LoginButton.IsEnabled = true;
@@ -653,6 +666,7 @@ public partial class MainWindow : Window
         ShowScreen("player");
         LiveEyebrow.Text = Visuals.Tracked("MOTORA BAĞLANILIYOR");
         NextButton.IsEnabled = false;
+        PlayButton.IsEnabled = false;
     }
 
     // ===================== giriş =====================
@@ -725,6 +739,34 @@ public partial class MainWindow : Window
     }
 
     void Next_Click(object sender, RoutedEventArgs e) => _link.Send(new JObject { ["t"] = "next" });
+
+    bool _paused;
+
+    /// <summary>Duraklat / devam (1.0.1): müzik aynı şarkının aynı saniyesinde bekler.</summary>
+    void PlayPause_Click(object sender, RoutedEventArgs e)
+    {
+        _paused = !_paused;
+        PlayIcon.Data = (Geometry)FindResource(_paused ? "IconPlay" : "IconPause");
+        PlayIcon.Margin = new Thickness(_paused ? 3 : 0, 0, 0, 0);
+        _link.Send(new JObject { ["t"] = "pause", ["on"] = _paused });
+    }
+
+    /// <summary>Destek sayfası (kurumsalmuzik.net/destek): e-posta ve WhatsApp.</summary>
+    void Support_Click(object sender, RoutedEventArgs e)
+    {
+        try { Process.Start(ServerApi.BaseUrl + "/destek")?.Dispose(); }
+        catch (Exception ex) { Log.Warn($"Tarayıcı açılamadı: {ex.Message}"); }
+    }
+
+    void Logout_Click(object sender, RoutedEventArgs e) => LogoutConfirm.Visibility = Visibility.Visible;
+
+    void LogoutCancel_Click(object sender, RoutedEventArgs e) => LogoutConfirm.Visibility = Visibility.Collapsed;
+
+    void LogoutConfirm_Click(object sender, RoutedEventArgs e)
+    {
+        LogoutConfirm.Visibility = Visibility.Collapsed;
+        _link.Send(new JObject { ["t"] = "logout" });
+    }
 
     void Updates_Click(object sender, RoutedEventArgs e)
     {

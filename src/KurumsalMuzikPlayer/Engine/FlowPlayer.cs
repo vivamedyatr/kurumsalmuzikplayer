@@ -15,7 +15,9 @@ namespace KurumsalMuzikPlayer.Engine;
 /// - O tarz henüz inmediyse sessizlik olmaz: inmiş başka bir tarz çalar, tarz inince ona geçilir.
 /// - Tarzın inmiş şarkıları paketin karışık sırasıyla; rastgele bir şarkıdan başlanır, liste bitince yeniden yüklenir.
 /// - Anons kuşağı: müzik duraklatılır, anonsları ikinci mpv çalar, sonra müzik tam kaldığı saniyeden sürer.
-/// - "Sonraki şarkı": 10 sn'de bir, anons sırasında kapalı. Durdur düğmesi yok.
+/// - "Sonraki şarkı": 10 sn'de bir, anons sırasında kapalı.
+/// - Duraklat (1.0.1, karar Onur 25 Eki 2026): müzik aynı şarkının aynı saniyesinde bekler, devam edince oradan sürer.
+///   Duraklatılmışken anons çalmaz (o dakikalar atlanır), yayın kaydına "durdu" yazılır. Program yeniden açılınca çalar.
 /// - 7 gün internetsiz ya da hizmet süresi bitti: müzik durur (Clock.PlayGate).
 /// </summary>
 sealed class FlowPlayer
@@ -53,6 +55,7 @@ sealed class FlowPlayer
     double _pos;
     string? _gateReason;
     volatile bool _running;
+    volatile bool _paused;
     int _restarts;
 
     public Announcer? Announcer { get; set; }
@@ -96,6 +99,7 @@ sealed class FlowPlayer
         _music?.Stop();
         _ann?.Stop();
         _music = _ann = null;
+        _paused = false;
         _loadedKey = "";
         _current = null;
         _breakTitle = null;
@@ -215,7 +219,8 @@ sealed class FlowPlayer
                 StopMusic();
                 return;
             }
-            if (d.Key != _loadedKey && _breakTitle == null) Load(d, false);
+            // Duraklatılmışken dilim değişse de bekler; devam edilince yeni tarza geçilir.
+            if (d.Key != _loadedKey && _breakTitle == null && !_paused) Load(d, false);
         }
         catch (Exception e)
         {
@@ -251,7 +256,7 @@ sealed class FlowPlayer
             if (resume != null && resumePos > 1) mpv.Command("loadfile", media.TrackUrl(list[0]), "replace", "start=" + (int)resumePos);
             else mpv.Command("loadfile", media.TrackUrl(list[0]), "replace");
             foreach (var t in list.Skip(1)) mpv.Command("loadfile", media.TrackUrl(t), "append");
-            mpv.Set("pause", false);
+            mpv.Set("pause", _paused);
             Log.Info($"Çalınıyor: {d.GenreName}, {list.Count} şarkı{(d.WaitingFor != null ? $" ({d.WaitingFor} iniyor)" : "")}");
         }
         catch (Exception e)
@@ -276,15 +281,15 @@ sealed class FlowPlayer
         var album = _library()?.Current?.Albums.FirstOrDefault(a => a.Id == t.Album)?.Title ?? "";
         Log.Info($"Çalıyor: {t.Title} · {album}");
         History.Add("music", t.Title, $"{album} · {genre}", t.Album);
-        PlayLog.State(true);
+        PlayLog.State(!_paused);
         PlayLog.Song(t.Title, album, genre);
-        if (Announcer != null) Announcer.Ready = true;
+        if (Announcer != null) Announcer.Ready = !_paused;
     }
 
     /// <summary>Liste bitti: yeniden yükle (bu arada inen şarkılar da girer), baştan çal.</summary>
     async Task OnIdle()
     {
-        if (_breakTitle != null || _reloading == 1 || _decision?.Genre == null) return;
+        if (_breakTitle != null || _reloading == 1 || _decision?.Genre == null || _paused) return;
         await Task.Delay(300).ConfigureAwait(false);
         var mpv = _music;
         if (mpv == null) return;
@@ -296,7 +301,7 @@ sealed class FlowPlayer
     async Task Watchdog()
     {
         var mpv = _music;
-        if (!_running || _breakTitle != null || _reloading == 1 || _decision?.Genre == null || mpv == null || _loadedKey == "") return;
+        if (!_running || _paused || _breakTitle != null || _reloading == 1 || _decision?.Genre == null || mpv == null || _loadedKey == "") return;
         var idle = await mpv.GetAsync("idle-active").ConfigureAwait(false);
         if (idle?.Type == JTokenType.Boolean && (bool)idle)
         {
@@ -317,13 +322,41 @@ sealed class FlowPlayer
 
     public bool Skip()
     {
-        if (_breakTitle != null || SkipWaitMs() > 0 || _current == null) return false;
+        if (_breakTitle != null || _paused || SkipWaitMs() > 0 || _current == null) return false;
         _lastSkip = NowMs();
         _music?.Command("playlist-next", "force");
         return true;
     }
 
     public int Volume => _volume;
+
+    /// <summary>Duraklat / devam. Anons sırasında ve yayın yokken kabul edilmez.</summary>
+    public bool SetPaused(bool paused)
+    {
+        if (paused == _paused) return true;
+        if (paused && (_breakTitle != null || _current == null)) return false;
+        _paused = paused;
+        if (paused)
+        {
+            if (Announcer != null) Announcer.Ready = false;
+            _music?.Set("pause", true);
+            PlayLog.State(false);
+            Log.Info("Duraklatıldı");
+        }
+        else
+        {
+            _music?.Set("pause", false);
+            if (_current != null)
+            {
+                PlayLog.State(true);
+                if (Announcer != null) Announcer.Ready = true;
+            }
+            Log.Info("Devam ediyor");
+            // Duraklatılmışken dilim değiştiyse yeni tarz hemen yüklensin.
+            Task.Run(Tick);
+        }
+        return true;
+    }
 
     public void SetVolume(int v)
     {
@@ -368,8 +401,8 @@ sealed class FlowPlayer
         finally
         {
             _breakTitle = null;
-            _music?.Set("pause", false);
-            if (announcer != null) announcer.Ready = _current != null;
+            _music?.Set("pause", _paused);
+            if (announcer != null) announcer.Ready = _current != null && !_paused;
             announcer?.BreakEnded();
         }
     }
@@ -416,6 +449,7 @@ sealed class FlowPlayer
         if (_gateReason != null) status = _gateReason;
         else if (d == null) status = "Paket bekleniyor";
         else if (d.Genre == null) status = $"{d.WaitingFor} iniyor; ilk şarkılar inince yayın başlar";
+        else if (_paused) status = "Duraklatıldı";
         else if (d.WaitingFor != null) status = $"{d.WaitingFor} iniyor; o inene kadar {d.GenreName} çalıyor";
         else status = "Çalıyor";
         return new JObject
@@ -432,6 +466,7 @@ sealed class FlowPlayer
             ["status"] = status,
             ["gate"] = _gateReason,
             ["breakTitle"] = _breakTitle,
+            ["paused"] = _paused,
             ["skipWaitMs"] = SkipWaitMs(),
             ["offlineDaysLeft"] = Clock.OfflineDaysLeft(),
             ["slots"] = m == null ? null : new JArray(m.Slots.OrderBy(s => s.Hour).Select(s =>

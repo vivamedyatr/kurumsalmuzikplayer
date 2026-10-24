@@ -94,6 +94,17 @@ public static class PlayLog
         _sendTimer = null;
     }
 
+    /// <summary>Hesaptan çıkış: gönderilemeyen kayıtlar silinir (sonraki giriş başka bir şube olabilir).</summary>
+    public static void Clear()
+    {
+        lock (Gate)
+        {
+            _queue.Clear();
+            _lastState = null;
+        }
+        SaveNow();
+    }
+
     public static void Flush()
     {
         var token = _token?.Invoke();

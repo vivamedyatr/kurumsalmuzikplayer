@@ -42,6 +42,9 @@ Aşağıdaki liste bu testler için bir rehberdir.
 | 12 | **Windows 7 SP1:** kurulumdan sonra giriş yap (güncellemeleri az bir Windows 7'de de dene) | Sunucuya bağlanır (TLS 1.2). Bağlanamazsa: günlükteki hata satırı + Windows Update durumu → bana. 1.0.0'da bunun için ayrı bir kontrol/uyarı yok (BRIEF §9). |
 | 13 | Pencereyi kenarından büyüt/küçült, başka ekrana taşı, kapat-aç | Oranı bozulmadan ölçeklenir; yeri ve boyutu hatırlanır. |
 | 14 | Programı kaldır, yeniden kur | Kaldırma veri klasörünü de siler: yeniden giriş ister, arşiv baştan iner (beklenen davranış). |
+| 15 | **1.0.1:** alt çubuktaki kırmızı düğmeyle duraklat, 1–2 dk bekle, devam et | Aynı şarkı kaldığı saniyeden sürer. Duraklatılmışken "DURAKLATILDI" yazar, anons çalmaz, "Sonraki" kapalı. Panelin yayın kaydında o aralık "durdu". |
+| 16 | **1.0.1:** sol rayda "Çıkış yap" → Vazgeç, sonra tekrar → Çıkış yap | Vazgeç'te hiçbir şey değişmez. Çıkışta müzik durur, giriş ekranında "Çıkış yapıldı" yazar. Aynı şube adıyla girince yeni cihaz hakkı harcanmaz, arşiv yeniden inmez. |
+| 17 | **1.0.1:** sol raydaki, giriş ekranındaki ve "Yayın durdu" ekranındaki "Destek ↗" | Tarayıcıda kurumsalmuzik.net/destek açılır (WhatsApp ve e-posta). |
 
 ## 4. Uzaktan izleme (panelden)
 
@@ -63,8 +66,7 @@ Aşağıdaki liste bu testler için bir rehberdir.
 ## 5.1 1.0.0'da bilerek olmayanlar (sonraki sürüm adayları, BRIEF §9)
 
 Testte eksik olarak not edilebilir; öncelik Onur'un:
-- Tıklanır vivamedya.com bağlantısı (giriş ekranında sadece yazı olarak var).
-- Sessize alma düğmesi (ses kaydırıcısı var).
+- ~~Tıklanır vivamedya.com bağlantısı~~ → 1.0.1'de "Destek ↗". ~~Sessize alma~~ → 1.0.1'de duraklat/devam.
 - Windows 7'de TLS/sertifika eksikliği için açık uyarı.
 - "Günlüğü gönder" (bugün günlük dosyaları elle istenir).
 

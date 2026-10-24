@@ -59,7 +59,16 @@
                                 </DockPanel>
                                 <Button Content="Akışı düzenle  ↗" Style="{StaticResource GhostButton}" Margin="0,12,0,0" Click="FlowEdit_Click"
                                         ToolTip="Kurumsal Müzik Net'te bu şubenin tarz akışını açar (akış şifresi istenir)." />
-                                <TextBlock x:Name="VersionText" Style="{StaticResource MonoText}" FontSize="10" Margin="0,12,0,0" />
+                                <DockPanel Margin="0,10,0,0">
+                                    <TextBlock x:Name="VersionText" DockPanel.Dock="Right" Style="{StaticResource MonoText}" FontSize="10" VerticalAlignment="Center" />
+                                    <Button Style="{StaticResource LinkButton}" Click="Support_Click" ToolTip="kurumsalmuzik.net/destek: e-posta ve WhatsApp">
+                                        <TextBlock Text="Destek ↗" />
+                                    </Button>
+                                    <Button Style="{StaticResource LinkButton}" Margin="14,0,0,0" Click="Logout_Click" HorizontalAlignment="Left"
+                                            ToolTip="Bu bilgisayarda mağaza hesabından çıkar (yayın durur)">
+                                        <TextBlock Text="Çıkış yap" />
+                                    </Button>
+                                </DockPanel>
                             </StackPanel>
                         </Border>
 
@@ -75,7 +84,7 @@
                                 <DockPanel>
                                     <Path Data="{StaticResource IconFlow}" Width="18" Height="18" Stretch="Uniform" StrokeThickness="2" Margin="0,0,12,0"
                                           Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" />
-                                    <TextBlock Text="Bugünkü akış" />
+                                    <TextBlock Text="Yayın akışı" />
                                 </DockPanel>
                             </RadioButton>
                             <RadioButton x:Name="NavAnn" GroupName="nav" Style="{StaticResource NavItem}" Checked="Nav_Checked">
@@ -190,7 +199,7 @@
                                 <Rectangle Width="9" Height="9" RadiusX="2" RadiusY="2" Fill="{StaticResource Fg}" Margin="0,0,6,0" />
                                 <TextBlock Text="Sırada" FontSize="11.5" Foreground="{StaticResource Fg2}" />
                             </StackPanel>
-                            <TextBlock Text="Bugünkü akış" FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="ExtraBold" FontSize="17" />
+                            <TextBlock Text="Yayın akışı" FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="ExtraBold" FontSize="17" />
                         </DockPanel>
                         <Grid Height="58">
                             <Grid x:Name="Strip" />
@@ -223,7 +232,7 @@
                         </Grid>
                     </StackPanel>
 
-                    <!-- Bugünkü akış / Anonslar / Geçmiş / Arşiv: aynı başlık düzeni, içi kodda dolar -->
+                    <!-- Yayın akışı / Anonslar / Geçmiş / Arşiv: aynı başlık düzeni, içi kodda dolar -->
                     <DockPanel x:Name="PageView" Margin="30,22,24,0" Visibility="Collapsed">
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,6,14">
                             <TextBlock x:Name="PageEyebrow" Style="{StaticResource Eyebrow}" Foreground="{StaticResource Vm}" />
@@ -259,11 +268,10 @@
 
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Grid Width="38" Height="38" ToolTip="Yayında. Mağaza yayını durdurulamaz; ses ayarı sağda.">
-                                    <Ellipse Margin="-6,-2,-6,-10" Fill="#22E4362D" />
-                                    <Ellipse x:Name="OnAir" Fill="{StaticResource Vm}" />
-                                    <Ellipse Width="10" Height="10" Fill="White" />
-                                </Grid>
+                                <Button x:Name="PlayButton" Style="{StaticResource PlayButton}" Click="PlayPause_Click" ToolTip="Duraklat">
+                                    <Path x:Name="PlayIcon" Data="{StaticResource IconPause}" Width="14" Height="14" Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
                                 <Button x:Name="NextButton" Style="{StaticResource IconButton}" Margin="14,0,0,0" VerticalAlignment="Center" Click="Next_Click"
                                         ToolTip="Sonraki şarkı">
                                     <Grid>
@@ -336,7 +344,12 @@
                         <TextBox x:Name="BranchBox" />
                         <Button x:Name="LoginButton" Content="Giriş yap" IsDefault="True" Style="{StaticResource RedButton}" Margin="0,6,0,0" Click="Login_Click" />
                         <TextBlock x:Name="LoginError" Foreground="#FF6B6B" TextWrapping="Wrap" Margin="0,12,0,0" FontSize="12.5" />
-                        <TextBlock x:Name="LoginVersion" Style="{StaticResource MonoText}" FontSize="10" Margin="0,26,0,0" />
+                        <DockPanel Margin="0,26,0,0">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource LinkButton}" Click="Support_Click" ToolTip="kurumsalmuzik.net/destek: e-posta ve WhatsApp">
+                                <TextBlock Text="Destek ↗" />
+                            </Button>
+                            <TextBlock x:Name="LoginVersion" Style="{StaticResource MonoText}" FontSize="10" VerticalAlignment="Center" />
+                        </DockPanel>
                     </StackPanel>
                 </Border>
             </Grid>
@@ -347,8 +360,28 @@
                     <TextBlock FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="Black" FontSize="24">KURUMSAL<Run Text="." Foreground="{StaticResource Vm}" /></TextBlock>
                     <TextBlock Text="Yayın durdu" FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="Black" FontSize="40" Margin="0,30,0,0" />
                     <TextBlock x:Name="ExpiredText" FontSize="15" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" Margin="0,12,0,0" LineHeight="22" />
-                    <TextBlock Text="Viva Medya · vivamedya.com" Style="{StaticResource MonoText}" Margin="0,28,0,0" />
+                    <Button Content="Destek  ↗" Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Margin="0,24,0,0" Padding="16,9" Click="Support_Click"
+                            ToolTip="kurumsalmuzik.net/destek: e-posta ve WhatsApp" />
+                    <TextBlock Text="Viva Medya · vivamedya.com" Style="{StaticResource MonoText}" Margin="0,22,0,0" />
                 </StackPanel>
+            </Grid>
+
+            <!-- ===================== ÇIKIŞ ONAYI ===================== -->
+            <Grid x:Name="LogoutConfirm" Background="#D90C0B0A" Visibility="Collapsed">
+                <Border Width="440" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{StaticResource Bg2}"
+                        BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="14" Padding="30,26">
+                    <StackPanel>
+                        <TextBlock x:Name="LogoutEyebrow" Style="{StaticResource Eyebrow}" Foreground="{StaticResource Vm}" />
+                        <TextBlock Text="Bu şubeden çıkış yapılsın mı?" FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="Black" FontSize="21"
+                                   Margin="0,8,0,0" TextWrapping="Wrap" />
+                        <TextBlock FontSize="13" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" LineHeight="19" Margin="0,12,0,0"
+                                   Text="Müzik ve anonslar durur. Yeniden yayın için kullanıcı adı, şifre ve şube adıyla tekrar giriş yapılır. İnen müzikler bu bilgisayarda kalır; aynı şube adıyla girilirse yeniden inmez." />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+                            <Button Content="Vazgeç" Style="{StaticResource GhostButton}" Padding="16,9" IsCancel="True" Click="LogoutCancel_Click" />
+                            <Button Content="Çıkış yap" Style="{StaticResource RedButton}" Padding="16,9" FontSize="12.5" Margin="10,0,0,0" Click="LogoutConfirm_Click" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Grid>
     </Viewbox>

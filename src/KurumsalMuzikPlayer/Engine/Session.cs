@@ -66,6 +66,25 @@ sealed class Session
         ScreenChanged?.Invoke(Current);
     }
 
+    /// <summary>Hesaptan çıkış (1.0.1): şube kaydı bu bilgisayardan silinir, giriş ekranına dönülür. Sunucudaki cihaz
+    /// kaydı durur; aynı şube adıyla yeniden girilirse aynı cihaz devralınır (cihaz hakkı harcanmaz). Arşiv silinmez.</summary>
+    public void Logout()
+    {
+        DeviceInfo? d;
+        lock (_gate)
+        {
+            d = _device;
+            if (d == null) return;
+            _device = null;
+            _expired = false;
+            _notice = "Çıkış yapıldı. Yayının yeniden başlaması için giriş yapın.";
+            DeviceStore.Clear();
+            Clock.Reset();
+        }
+        Log.Info($"Hesaptan çıkış: {d.AccountName} · {d.BranchName} ({d.Code})");
+        ScreenChanged?.Invoke(Current);
+    }
+
     public void Start()
     {
         var d = DeviceStore.Load();

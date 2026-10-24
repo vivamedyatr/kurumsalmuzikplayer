@@ -219,6 +219,20 @@ sealed class EngineHost : ApplicationContext
             case "next":
                 _music.Skip();
                 break;
+            case "pause":
+                _music.SetPaused((bool?)m["on"] ?? true);
+                SendState();
+                break;
+            case "logout":
+                System.Threading.Tasks.Task.Run(() =>
+                {
+                    // Önce müzik durur ("durdu" kaydı), bekleyen yayın kaydı bu şubenin anahtarıyla gönderilir, sonra çıkılır.
+                    _music.Stop();
+                    PlayLog.Flush();
+                    PlayLog.Clear();
+                    _session.Logout();
+                });
+                break;
             case "flow-edit":
                 Log.Info("Akışı düzenle açıldı; paket birkaç kez erken sorulacak");
                 CurrentLibrary()?.RefreshAfterFlowEdit();
