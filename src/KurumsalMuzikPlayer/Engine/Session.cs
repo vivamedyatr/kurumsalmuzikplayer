@@ -199,6 +199,7 @@ sealed class Session
                 ["notice"] = _notice,
                 ["account"] = _device?.AccountName,
                 ["branch"] = _device?.BranchName,
+                ["code"] = _device?.Code,
                 ["online"] = _online,
                 ["checkedAt"] = _checkedAt?.ToString("HH:mm"),
                 ["server"] = ServerApi.BaseUrl,

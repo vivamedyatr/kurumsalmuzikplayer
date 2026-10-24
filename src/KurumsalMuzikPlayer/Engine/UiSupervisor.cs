@@ -96,6 +96,8 @@ sealed class UiSupervisor
                     _ui = ch;
                     _uiPid = (int?)m["pid"] ?? 0;
                     _lastPongMs = _clock.ElapsedMilliseconds;
+                    // Açılan pencere bağlandı: "ikinci kopya açma" beklemesi biter (kapatılırsa hemen yeniden açılabilsin).
+                    _launchedAtMs = -60_000;
                 }
                 if (old != null && old != ch) old.Close();
                 ch.Closed += () =>

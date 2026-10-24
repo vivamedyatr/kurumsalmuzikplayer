@@ -55,6 +55,18 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        WindowPlacement.Restore(this);
+        // Yer ve boyut değişince 1 sn sonra kaydedilir (pencere kapatılmadan öldürülse de kalsın).
+        var placement = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        placement.Tick += (_, _) =>
+        {
+            placement.Stop();
+            WindowPlacement.Save(this);
+        };
+        LocationChanged += (_, _) => { placement.Stop(); placement.Start(); };
+        SizeChanged += (_, _) => { placement.Stop(); placement.Start(); };
+        StateChanged += (_, _) => { placement.Stop(); placement.Start(); };
+        Closing += (_, _) => WindowPlacement.Save(this);
         VersionText.Text = $"{AppPaths.ProductName} {AppInfo.Version}";
         _clock = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clock.Tick += (_, _) => Clock.Text = DateTime.Now.ToString("HH:mm");
@@ -104,8 +116,10 @@ public partial class MainWindow : Window
         ShowScreen(screen);
         var account = (string?)s["account"];
         var branch = (string?)s["branch"];
-        BranchText.Text = account != null ? $"{account} · {branch}" : "";
-        BranchText.ToolTip = (string?)s["server"];
+        var code = (string?)s["code"];
+        // Cihaz kodu destekte telefonda sorulur (panelde aynı kodla görünür).
+        BranchText.Text = account != null ? $"{account} · {branch}{(code != null ? " · " + code : "")}" : "";
+        BranchText.ToolTip = $"Sunucu: {(string?)s["server"]}";
         var gate = (string?)s["gate"];
         var online = (bool?)s["online"] != false;
         LiveText.Text = screen switch

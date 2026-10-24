@@ -10,9 +10,9 @@
     <Product>Kurumsal MÃ¼zik Player</Product>
     <Copyright>Â© 2026 Viva Medya</Copyright>
     <Version>1.0.0</Version>
-    <InformationalVersion>1.0.0-faz4.1</InformationalVersion>
+    <InformationalVersion>1.0.0-faz5</InformationalVersion>
     <!-- Güncelleme sırası: son parça her yayında artar (latest.json "build"). -->
-    <FileVersion>1.0.0.41</FileVersion>
+    <FileVersion>1.0.0.50</FileVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>
