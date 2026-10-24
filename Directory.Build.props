@@ -10,7 +10,7 @@
     <Product>Kurumsal Müzik Player</Product>
     <Copyright>© 2026 Viva Medya</Copyright>
     <Version>1.0.0</Version>
-    <InformationalVersion>1.0.0-faz2.1</InformationalVersion>
+    <InformationalVersion>1.0.0-faz2.2</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>

@@ -45,10 +45,10 @@ gerekir; ikisi de sadece bilgisayardaki taklit R2'yi kullanır.
 - `gunluk\motor-yyyy-MM-dd.txt`, `gunluk\pencere-yyyy-MM-dd.txt` — 7 gün tutulur
 - `ayarlar.json` — ses düzeyi
 - `cihaz.bin` — şube kaydı ve sunucu anahtarı (DPAPI ile şifreli; başka kullanıcı/bilgisayarda açılmaz)
-- `paket.json` — son offline paket (akış dilimleri, albümler, şarkılar; arşiv anahtarı hariç)
+- `paket.json` — son offline paket (akış dilimleri, albümler, şarkılar)
 - `cihaz-paket.json` — bu bilgisayarın albüm listesi ve "Aylık yeni müzik" anahtarı
-- `arsiv-anahtari.bin` — arşiv anahtarı (DPAPI)
-- `arsiv\<anahtar sürümü>\<albüm>.kmp` — albüm kapları (şifreli parçalar, Worker'dan geldiği gibi)
+- `arsiv-anahtari.bin` — bu bilgisayara özel arşiv anahtarı (ilk açılışta üretilir, DPAPI)
+- `arsiv\c1\<albüm>.kmp` — albüm kapları (parçalar bellekte şifrelenip eklenir)
 - `kapak\<albüm>.jpg` — albüm kapakları
 - `deneme-muzik\` — Faz 0: buraya konan ses dosyaları karışık ve döngüde çalar
 - `deneme-arsiv\` — Faz 0 dayanıklılık deneyinin yazdığı sahte arşiv (her deneyde silinip baştan yazılır)

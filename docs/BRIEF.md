@@ -32,7 +32,7 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 | # | Konu | Karar |
 |---|---|---|
 | 1 | Dil ve motor | **C#** + **mpv** ses motoru. Chromium/Electron yok. |
-| 2 | Arşiv koruması | **Seçenek A — sunucu şifreler** (§5). Program indirdiğini dokunmadan diske yazar, şifre bellekte çözülür. |
+| 2 | Arşiv koruması | ~~Seçenek A — sunucu şifreler~~ → **player bellekte şifreler, bilgisayara özel anahtar** (24 Eki 2026, §5). Albüm başına tek dosya; şifre bellekte çözülür. |
 | 3 | Kod imzalama | **Şimdilik yok** (imzasız). Kurulumda "bilinmeyen yayıncı" uyarısı çıkar. Antivirüs sorunu çıkarsa yeniden değerlendirilir. |
 | 4 | Geçiş | **Elle kurulum.** Müşteriler henüz Kurumsal Müzik Net'e taşınmadı; 2.x'ten otomatik geçiş yapılmaz. |
 | 5 | Ad | Her yerde **"Kurumsal Müzik Player"**; sürüm sadece pencerenin sağ altında ("Kurumsal Müzik Player 1.0.3"). Programda "by Viva Medya" + vivamedya.com bağlantısı. |
@@ -91,29 +91,31 @@ KurumsalMuzikPlayer.exe  (motor; görünmez, tepside)
   indirme hatası gerçek sebebiyle yazılır. Uzaktan destekte "günlüğü gönder" (sunucuya, onayla).
 - **Veri klasörü:** `%LOCALAPPDATA%\Kurumsal Muzik Player\` (eski programla karışmaz).
 
-## 5. Arşiv koruması — Seçenek A (karar Onur, 23 Eki 2026)
+## 5. Arşiv koruması — ~~Seçenek A (23 Eki 2026)~~ → player şifreler, bilgisayara özel anahtar (karar Onur, 24 Eki 2026)
 
 **Sorun:** 2.x her `.ts` parçasını indirip bilgisayarda AES ile şifreliyor ve tek tek dosya olarak yazıyordu (binlerce
 yeni, rastgele görünen dosya). Fidye yazılımları tam olarak bunu yapar; davranış korumaları bu deseni yakalar.
 
 **Çözüm:**
-1. **Sunucu (Worker) şifreler.** Program parçayı istediğinde Worker onu ~~paket anahtarıyla~~ → **herkes için tek arşiv
-   anahtarıyla** (karar Onur 23 Eki 2026: "her şube için ayrı şifrelemeye gerek yok") AES-256-CTR ile şifreleyip
-   `/e/` adresinden gönderir. Program bilgisayarda hiç şifreleme yapmaz; gelen baytları olduğu gibi yazar. Aynı parça
-   her yerde aynı şifreli baytlar olduğundan Cloudflare önbelleği şifreli hâli de tutar (Worker her parçayı bir kez şifreler).
-2. **Albüm başına tek dosya.** Bir albümün bütün şarkı parçaları tek bir kap dosyasına (`<albüm>.kmp`) art arda eklenir;
-   başta küçük bir içindekiler tablosu. ~3.200 dosya yerine akış başına ~50–150 dosya.
-3. **Şifre bellekte çözülür**, mpv'ye programın içindeki yerel akış üzerinden verilir (diske açık yazılmaz).
-4. **Anahtar:** programın içinde durmaz; geçerli şube girişiyle manifestte (`media.archive`) gelir, DPAPI ile
-   `arsiv-anahtari.bin`'de saklanır (`paket.json`'a yazılmaz). Klasör başka bilgisayara kopyalansa anahtar orada
-   açılmaz; o bilgisayar ancak geçerli bir şube girişiyle anahtarı alabilir. `MEDIA_TOKEN_SECRET`'tan türetilir
-   (yeni gizli bilgi yok); anahtar sürümü (`v1`) değişirse arşiv bir kez yeniden iner (`arsiv\<sürüm>\`).
+1. **Albüm başına tek dosya** (asıl düzeltme). Bir albümün bütün şarkı parçaları tek bir kap dosyasına (`<albüm>.kmp`)
+   art arda eklenir. ~3.200 dosya yerine akış başına ~50–150 dosya; `.part` → yeniden adlandırma yok.
+2. **Player şifreler, bellekte.** Parça Worker'ın `/m/` adresinden (web ile aynı) iner, bellekte AES-256-CTR ile
+   şifrelenip kaba eklenir; açık hâli diske hiç yazılmaz. ~~Sunucu (Worker) şifreler, herkes için tek anahtar, `/e/`
+   adresi (23 Eki 2026)~~ — 24 Eki'de bırakıldı: kaplarla birlikte diskte görünen davranış iki yöntemde de aynı
+   (birkaç büyük dosyaya rastgele görünen veri ekleniyor; antivirüs şifrenin nerede yapıldığını göremez), Worker'a
+   iş ve bağımlılık ekliyordu. Bilgisayara yükü 1 MB'lık parça başına birkaç ms.
+3. **Şifre bellekte çözülür**, mpv'ye programın içindeki yerel adres üzerinden verilir (diske açık yazılmaz).
+4. **Anahtar bilgisayara özel:** ilk açılışta rastgele üretilir, DPAPI ile `arsiv-anahtari.bin`'de saklanır. Klasör
+   başka bilgisayara ya da Windows kullanıcısına kopyalansa açılmaz. Anahtar sürümü `c1` (`arsiv\c1\`); başka
+   anahtarla yazılmış eski klasörler açılışta silinir. Program yeniden kurulursa (kaldırma veri klasörünü siler) arşiv baştan iner.
 
-**Neden güvenli:** ses dosyaları zaten rastgele görünür; şüpheli olan, bir programın yerelde okuyup-şifreleyip-yazması
-ve dosya sayısıdır. A ikisini de ortadan kaldırır (Spotify ve Steam önbellekleri de böyle çalışır).
+**Worker yükü (24 Eki 2026, canlı ölçüm):** `/m/` isteği başına ~4 ms işlemci (ücretsiz plan sınırı 10 ms); Worker'ın
+şifreli `/e/` adresi istek başına ~12 ms (ilk istek) tutuyordu. 1.000 şubede asıl sınır istek sayısı: ilk kurulum
+şube başına ~6.000 istek (6 GB / ~1 MB), sonra ayda ~800. Ücretsiz plan günde 100.000 istek → şubelere yaymadan
+önce Workers Paid (aylık 5 $, 10 milyon istek dahil) gerekir (karar Onur'da).
 
-**Sunucu tarafı (web projesinde, Onur onayıyla — §7):** yazıldı, yerelde denendi ve canlıya yayınlandı (web `7ce81e9`, Worker sürümü `84590864`, 23 Eki 2026;
-`src/lib/archive-crypto.ts`, `worker/src/index.ts`). Worker ücretsiz plan CPU sınırı canlıda ölçülür.
+**Sunucu tarafı:** web `7ce81e9` (Worker `84590864`) ile canlıya giden `/e/` adresi ve manifestteki `media.archive`
+artık kullanılmıyor; **sonraki web yayınında kaldırılacak** (karar Onur 24 Eki 2026). `X-App: kmp` kalır (X/Y anonsları).
 
 **Çalma:** program içinde sadece bu bilgisayardan erişilen (127.0.0.1, rastgele oturum adresli) küçük bir adres her
 şarkıyı mpv'ye HLS listesi olarak verir; parçalar istendiği anda kaptan okunup bellekte çözülür.
@@ -142,7 +144,8 @@ Akış ve anons kuralları web'den **birebir** C#'a çevrilir ve web'in testleri
 1. **Program kimliği:** sunucu bugün `X-App-Version < 2.0.17` olan programa saatli X/Y anonslarını göndermiyor. 1.0
    ayrı bir başlıkla kendini tanıtır (`X-App: kmp`); sunucu bu başlığı görünce sürüm karşılaştırmasını atlar. Panelde
    cihaz "Offline · KMP 1.0.3" diye görünür.
-2. **Worker "şifreli ver" kipi** (§5) ve manifestte paket anahtarı. Eski 2.x programlar şifresiz kipi kullanmaya devam eder.
+2. ~~**Worker "şifreli ver" kipi** (§5) ve manifestte paket anahtarı.~~ Yapıldı ve canlıya gitti (23 Eki), 24 Eki'de bırakıldı
+   (şifreleme player'da); `/e/` ve `media.archive` sonraki web yayınında kaldırılır.
 3. **Güncelleme dosyası:** `kurumsalmuzik.net/indir/kmp/` altında sürüm bilgisi (`latest.json`: sürüm, adres, SHA-256) ve
    kurulum dosyası. İndirme adresi `/indir/Kurumsal-Muzik-Player-Kurulum.exe` 1.0 yayına girince 1.0'ı gösterir (o güne kadar 2.0.17).
 
@@ -159,7 +162,7 @@ açıkken 2 saat çalışır.
 **Faz 1 — Giriş ve cihaz.** Kurulum dosyası (Inno Setup), giriş ekranı, `/register`, `/status`, tek kopya, oturum açılınca başlama, düşme.
 *Kanıt: Windows 7 ve 11'de kur → şube girişi → panelde "Offline · KMP" cihaz → aynı şube adıyla ikinci bilgisayar girince ilki girişe döner.*
 
-**Faz 2 — İndirme ve arşiv.** Manifest, öncelikli, 6 Mbps sınırlı, kesilip devam eden indirme; albüm kapları; Worker şifreli kip (onaylı).
+**Faz 2 — İndirme ve arşiv.** Manifest, öncelikli, 6 Mbps sınırlı, kesilip devam eden indirme; albüm kapları; player'da bellekte şifreleme.
 *Kanıt: 3 Mbps hatta paket iner → internet kesilip gelince devam eder → program hiç donmaz → klasör başka bilgisayara kopyalanınca çalmaz.*
 
 **Faz 3 — Çalma, anonslar, internetsiz 7 gün.** Tarz akışı, gün bandı, ses, sonraki, geçmiş, anonslar (X/Y dahil), lisans, yayın kaydı.
@@ -178,7 +181,7 @@ açıkken 2 saat çalışır.
 
 - [ ] Faz 0 — İskelet ve kanıt deneyi (iskelet hazır, 23 Eki 2026: motor/pencere/mpv ayrı süreç, bekçiler denendi — pencere donunca 15 sn'de yeniden açılır, mpv çökünce 2 sn'de kaldığı yerden sürer, motor çökünce mpv de kapanır ve pencere motoru ~10 sn'de yeniden başlatır; ilk dayanıklılık denemesi Onur'un Kaspersky + Acronis'li bilgisayarında 9 dk, 0,41 GB albüm kabı yazımı: donma yok, Windows 1000/1002 kaydı yok, antivirüs uyarısı yok — 2.x bu bilgisayarda 0–7 dk içinde donuyordu; 24 saatlik kanıt bekliyor)
 - [ ] Faz 1 — Giriş ve cihaz (yapıldı, 23 Eki 2026: kurulum dosyası, giriş ekranı, cihaz kaydı DPAPI ile, 15 dk'da bir durum sorgusu, düşme, süre dolması, Windows'la başlama; yerel sunucuyla uçtan uca ve kur/güncelle/kaldır denendi. Onur'un Windows 7 ve 11 kanıtı bekliyor)
-- [ ] Faz 2 — İndirme ve arşiv (program tarafı yapıldı ve yerel sunucu + yerel Worker ile denendi, 23 Eki 2026: şifreli indirme, albüm kapları, yarıda kesilip devam, arşivden çalma. Web + Worker canlıda, 23 Eki 2026: web 7ce81e9, Worker 84590864; kanıt senaryosu Onur'la canlıda bekliyor)
+- [ ] Faz 2 — İndirme ve arşiv (program tarafı yapıldı ve yerel sunucu + yerel Worker ile denendi, 23 Eki 2026: şifreli indirme, albüm kapları, yarıda kesilip devam, arşivden çalma. 24 Eki 2026: şifreleme player'a taşındı (1.0.0-faz2.2), canlı sunucuyla Onur'un bilgisayarında indiriyor ve arşivden çalıyor; kanıt senaryosu bekliyor)
 - [ ] Faz 3 — Çalma, anonslar, internetsiz 7 gün
 - [ ] Faz 4 — Akış değişimi, paket döngüsü, güncelleme
 - [ ] Faz 5 — Mağazada deneme ve dağıtım

@@ -16,8 +16,9 @@ namespace Kmp.Core;
 /// Yerel arşiv (BRIEF §2.2, §5): akışın offline paketi.
 /// - İndirme kendi iş parçacığında, düşük öncelikte; hız sınırı 6 Mbps; kesilip devam eder (biten parça bir daha inmez).
 /// - Öncelik: şu an çalan tarz, sonra sıradaki saatlerinki, sonra diğerleri; tarz içinde paket sırasıyla.
-/// - Parçalar Worker'ın /e/ adresinden şifreli gelir ve olduğu gibi albüm kabına eklenir; bilgisayarda şifreleme yok.
-///   Çalarken bellekte çözülür. Anahtar manifestte gelir, DPAPI ile saklanır.
+/// - Parçalar Worker'ın /m/ adresinden açık gelir, bellekte bu bilgisayara özel anahtarla şifrelenip albüm kabına eklenir
+///   (karar Onur 24 Eki 2026; diskte açık hâli hiç durmaz). Çalarken bellekte çözülür. Anahtar bilgisayarda üretilir,
+///   DPAPI ile saklanır: klasör başka bilgisayara ya da kullanıcıya kopyalansa açılmaz.
 /// - Pakette olmayan albümler ancak paket tamamen inince, dosya dosya silinir.
 /// </summary>
 public sealed class Library : IDisposable
@@ -30,6 +31,8 @@ public sealed class Library : IDisposable
         int.TryParse(Environment.GetEnvironmentVariable("KMP_HIZ_KBPS"), out var k) && k > 0 ? k : 6000;
     static readonly byte[] KeyEntropy = Encoding.UTF8.GetBytes("Kurumsal Müzik Player · arşiv");
     static readonly TimeZoneInfo Istanbul = FindIstanbul();
+    /// <summary>Bilgisayara özel anahtarın sürümü (arsiv\c1\). Değişirse arşiv bir kez yeniden iner.</summary>
+    const string LocalKeyId = "c1";
 
     readonly Func<string?> _token;
     readonly Action<string?> _onRemoved;
@@ -166,6 +169,7 @@ public sealed class Library : IDisposable
         try
         {
             LoadLocal();
+            RemoveOtherKeyFolders();
             var backoff = RetryMinMs;
             var tokenFails = 0;
             while (!_stop)
@@ -324,17 +328,16 @@ public sealed class Library : IDisposable
 
     byte[] Download(Manifest m, Manifest.Track t, int i)
     {
-        var url = $"{m.Media.Base}/e/{EncodeKey(t.Key)}/{i:0000}.ts?t={Uri.EscapeDataString(m.Media.Token)}";
+        var url = $"{m.Media.Base}/m/{EncodeKey(t.Key)}/{i:0000}.ts?t={Uri.EscapeDataString(m.Media.Token)}";
         using var res = ServerApi.Media.GetAsync(url, HttpCompletionOption.ResponseContentRead).GetAwaiter().GetResult();
         var status = (int)res.StatusCode;
         if (status is 401 or 403) throw new MediaDenied();
         if (status == 404) throw new MediaMissing();
         if (!res.IsSuccessStatusCode) throw new HttpRequestException($"medya sunucusu {status}");
         var bytes = res.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
-        // Yarım ya da yanlış anahtarla gelen parça kaydedilmez: çözülen ilk paket MPEG-TS (0x47) ile başlamalı.
-        if (bytes.Length < 188 || ArchiveCrypto.Crypt(_key!, t.SegmentKey(i), bytes, 1)[0] != 0x47)
-            throw new InvalidDataException("bozuk parça");
-        return bytes;
+        // Yarım ya da bozuk parça kaydedilmez: MPEG-TS paketleri 0x47 ile başlar.
+        if (bytes.Length < 188 || bytes[0] != 0x47) throw new InvalidDataException("bozuk parça");
+        return ArchiveCrypto.Crypt(_key!, t.SegmentKey(i), bytes);
     }
 
     static string Explain(Exception e)
@@ -392,8 +395,7 @@ public sealed class Library : IDisposable
         Interlocked.Exchange(ref _clockOffsetMs, offset);
         if (Math.Abs(offset) > 120_000) Log.Warn($"Bilgisayar saati sunucudan farklı: {offset / 60_000} dk");
 
-        if (m.Media.Archive is { Key.Length: > 0 } a) UseKey(a.Id, Convert.FromBase64String(a.Key), save: true);
-        m.Media.Archive = null; // anahtar paket.json'a açık yazılmaz
+        m.Media.Archive = null; // sunucunun eski ortak anahtarı kullanılmıyor (karar 24 Eki 2026); paket.json'a yazılmaz
 
         if (m.Device != null)
         {
@@ -446,10 +448,17 @@ public sealed class Library : IDisposable
             {
                 var json = Encoding.UTF8.GetString(ProtectedData.Unprotect(File.ReadAllBytes(KeyFile), KeyEntropy, DataProtectionScope.CurrentUser));
                 var k = JsonConvert.DeserializeObject<StoredKey>(json);
-                if (k != null) UseKey(k.Id, Convert.FromBase64String(k.Key), save: false);
+                if (k?.Id == LocalKeyId) UseKey(k.Id, Convert.FromBase64String(k.Key), save: false);
             }
         }
-        catch (Exception e) { Log.Warn($"Arşiv anahtarı açılamadı ({e.GetType().Name}); sunucudan yeniden alınacak"); }
+        catch (Exception e) { Log.Warn($"Arşiv anahtarı açılamadı ({e.GetType().Name})"); }
+        if (_key == null)
+        {
+            var key = new byte[32];
+            using (var rng = RandomNumberGenerator.Create()) rng.GetBytes(key);
+            UseKey(LocalKeyId, key, save: true);
+            Log.Info("Bu bilgisayara özel arşiv anahtarı üretildi; arşiv (varsa eskisi silinerek) baştan iner");
+        }
         try
         {
             if (File.Exists(ManifestFile)) _manifest = JsonConvert.DeserializeObject<Manifest>(File.ReadAllText(ManifestFile, Encoding.UTF8));
@@ -543,6 +552,29 @@ public sealed class Library : IDisposable
             }
         }
         catch (Exception e) { Log.Warn("Arşiv temizliği: " + e.Message); }
+    }
+
+    /// <summary>Başka anahtarla yazılmış eski arşiv klasörleri hiçbir işe yaramaz: açılışta dosya dosya silinir.</summary>
+    void RemoveOtherKeyFolders()
+    {
+        try
+        {
+            if (!Directory.Exists(ArchiveRoot)) return;
+            foreach (var dir in Directory.GetDirectories(ArchiveRoot))
+            {
+                if (string.Equals(Path.GetFileName(dir), _keyId, StringComparison.OrdinalIgnoreCase)) continue;
+                var files = Directory.GetFiles(dir);
+                foreach (var f in files)
+                {
+                    if (_stop) return;
+                    File.Delete(f);
+                    Nap(200);
+                }
+                Directory.Delete(dir);
+                Log.Info($"Eski anahtarlı arşiv silindi: {Path.GetFileName(dir)} ({files.Length} dosya)");
+            }
+        }
+        catch (Exception e) { Log.Warn("Eski arşiv silinemedi: " + e.Message); }
     }
 
     /// <summary>Albüm kapakları (küçük, şifresiz dosyalar). Hepsi tamamsa true.</summary>
