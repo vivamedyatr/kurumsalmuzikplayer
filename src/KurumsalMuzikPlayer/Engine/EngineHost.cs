@@ -39,6 +39,8 @@ sealed class EngineHost : ApplicationContext
     long _maxStallMs;
     int _stalls;
     int _shuttingDown;
+    int _archiveTick;
+    JObject? _archive;
 
     public EngineHost(Args args)
     {
@@ -249,7 +251,10 @@ sealed class EngineHost : ApplicationContext
                 ["kind"] = h.Kind,
                 ["title"] = h.Title,
                 ["sub"] = h.Sub,
+                ["cover"] = h.AlbumId != null ? lib?.CoverFile(h.AlbumId) : null,
             }));
+            if (lib != null && ++_archiveTick % 5 == 1) _archive = lib.DescribeGenres();
+            s["archive"] = lib != null ? _archive : null;
             s["t"] = "state";
             s["exp"] = _experiment?.Summary();
             _ui.SendState(s);

@@ -22,11 +22,12 @@ public static class History
         public string Kind { get; set; } = "music";
         public string Title { get; set; } = "";
         public string Sub { get; set; } = "";
+        public string? AlbumId { get; set; }
     }
 
     static string FilePath => Path.Combine(AppPaths.DataDir, "gecmis.json");
 
-    public static void Add(string kind, string title, string sub = "")
+    public static void Add(string kind, string title, string sub = "", string? albumId = null)
     {
         var now = Clock.Now();
         lock (Gate)
@@ -34,7 +35,7 @@ public static class History
             var last = _items.LastOrDefault();
             // Aynı şarkı art arda iki kez yazılmaz (yeniden bağlanma, liste tazeleme).
             if (last != null && last.Kind == kind && last.Title == title && now - last.At < 10 * 60_000) return;
-            _items.Add(new Entry { At = now, Kind = kind, Title = title, Sub = sub });
+            _items.Add(new Entry { At = now, Kind = kind, Title = title, Sub = sub, AlbumId = albumId });
             var cutoff = now - KeepMs;
             if (_items.Count > Max || _items[0].At < cutoff) _items = _items.Where(i => i.At >= cutoff).Skip(Math.Max(0, _items.Count - Max)).ToList();
             _saveTimer ??= new Timer(_ => Save(), null, 5000, Timeout.Infinite);

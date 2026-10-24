@@ -167,6 +167,27 @@ public sealed class Library : IDisposable
     /// <summary>İstanbul saati (sunucu saatine göre düzeltilmiş).</summary>
     public DateTime IstanbulNow() => Clock.Istanbul().DateTime;
 
+    /// <summary>Arşiv sekmesi için: tarz tarz inmiş şarkı sayısı ve diskteki boyut (saniyede bir değil, istenince).</summary>
+    public JObject DescribeGenres()
+    {
+        var m = _manifest;
+        var genres = new JArray();
+        if (m != null)
+            foreach (var g in m.Genres)
+            {
+                var total = m.Tracks.Count(t => t.Genre == g.Slug);
+                if (total == 0) continue;
+                genres.Add(new JObject
+                {
+                    ["name"] = g.Name, ["ready"] = ReadyTracks(g.Slug).Count, ["total"] = total,
+                    ["from"] = g.Cover?.From, ["to"] = g.Cover?.To,
+                });
+            }
+        long bytes;
+        lock (_gate) bytes = _containers.Values.Sum(c => c.Length);
+        return new JObject { ["genres"] = genres, ["bytes"] = bytes, ["albums"] = m?.Albums.Count ?? 0, ["tracks"] = m?.Tracks.Count ?? 0 };
+    }
+
     public JObject Describe()
     {
         lock (_gate)

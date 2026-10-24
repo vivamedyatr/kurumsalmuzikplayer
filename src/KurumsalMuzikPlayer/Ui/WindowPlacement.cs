@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Windows;
 using Kmp.Core;
@@ -6,8 +5,8 @@ using Kmp.Core;
 namespace KurumsalMuzikPlayer.Ui;
 
 /// <summary>
-/// Pencerenin boyutu ve yeri hatırlanır (eski BRIEF karar 26): pencere.json. Kayıtlı yer artık ekranda değilse
-/// (monitör söküldü, çözünürlük değişti) ortada açılır; küçük ekrana sığdırılır.
+/// Pencerenin yeri ve ölçeği hatırlanır (pencere.json). Kayıtlı yer artık ekranda değilse (monitör söküldü, çözünürlük
+/// değişti) ortada açılır; ölçek ekrana sığacak şekilde sınırlanır (WindowFrame).
 /// </summary>
 static class WindowPlacement
 {
@@ -15,44 +14,32 @@ static class WindowPlacement
     {
         public double Left { get; set; }
         public double Top { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
-        public bool Maximized { get; set; }
+        public double Scale { get; set; } = 1;
     }
 
     static string FilePath => Path.Combine(AppPaths.DataDir, "pencere.json");
 
-    public static void Restore(Window w)
+    /// <summary>Yeri uygular, açılış ölçeğini döner.</summary>
+    public static double Restore(Window w)
     {
         var s = JsonFile.Read<Saved>(FilePath);
+        var scale = WindowFrame.FitScale(s?.Scale is > 0 ? s.Scale : 1);
+        if (s == null) return scale;
         var screen = new Rect(SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
             SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
-        var work = SystemParameters.WorkArea;
-        if (s != null && s.Width >= w.MinWidth && s.Height >= w.MinHeight)
+        // Başlık çubuğunun bir kısmı ekranda kalmalı ki pencere tutulup taşınabilsin.
+        if (screen.Contains(new Point(s.Left + 40, s.Top + 10)) && screen.Contains(new Point(s.Left + 200, s.Top + 10)))
         {
-            w.Width = Math.Min(s.Width, work.Width);
-            w.Height = Math.Min(s.Height, work.Height);
-            // Başlık çubuğunun bir kısmı ekranda kalmalı ki pencere tutulup taşınabilsin.
-            if (screen.Contains(new Point(s.Left + 40, s.Top + 10)) && screen.Contains(new Point(s.Left + Math.Min(s.Width, 200), s.Top + 10)))
-            {
-                w.WindowStartupLocation = WindowStartupLocation.Manual;
-                w.Left = s.Left;
-                w.Top = s.Top;
-            }
-            if (s.Maximized) w.WindowState = WindowState.Maximized;
+            w.WindowStartupLocation = WindowStartupLocation.Manual;
+            w.Left = s.Left;
+            w.Top = s.Top;
         }
-        else
-        {
-            w.Width = Math.Min(w.Width, work.Width);
-            w.Height = Math.Min(w.Height, work.Height);
-        }
+        return scale;
     }
 
-    public static void Save(Window w)
+    public static void Save(Window w, double scale)
     {
-        if (w.WindowState == WindowState.Minimized) return;
-        var r = w.WindowState == WindowState.Maximized ? w.RestoreBounds : new Rect(w.Left, w.Top, w.ActualWidth, w.ActualHeight);
-        if (r.IsEmpty || r.Width < 100) return;
-        JsonFile.Write(FilePath, new Saved { Left = r.Left, Top = r.Top, Width = r.Width, Height = r.Height, Maximized = w.WindowState == WindowState.Maximized });
+        if (w.WindowState != WindowState.Normal || double.IsNaN(scale) || scale <= 0) return;
+        JsonFile.Write(FilePath, new Saved { Left = w.Left, Top = w.Top, Scale = scale });
     }
 }

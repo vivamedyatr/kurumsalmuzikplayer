@@ -200,6 +200,7 @@ sealed class Session
                 ["account"] = _device?.AccountName,
                 ["branch"] = _device?.BranchName,
                 ["code"] = _device?.Code,
+                ["serviceEnds"] = _device is { ServiceEndsAt: > 0 } d ? Clock.Istanbul(d.ServiceEndsAt - 1).ToString("dd.MM.yyyy") : null,
                 ["online"] = _online,
                 ["checkedAt"] = _checkedAt?.ToString("HH:mm"),
                 ["server"] = ServerApi.BaseUrl,

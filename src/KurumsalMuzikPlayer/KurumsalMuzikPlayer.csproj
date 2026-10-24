@@ -15,5 +15,8 @@
     <Reference Include="System.Net.Http" />
     <None Include="..\..\vendor\mpv\mpv.exe" Link="mpv\mpv.exe" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\..\vendor\mpv\mpv.exe')" />
     <None Include="..\..\vendor\mpv\MPV-LISANS.txt" Link="mpv\MPV-LISANS.txt" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Yazı tipleri programın içinde (Archivo, IBM Plex Mono; SIL OFL); lisansları kurulum klasöründe. -->
+    <Resource Include="Fonts\*.ttf" />
+    <None Include="Fonts\*-OFL.txt" Link="lisanslar\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

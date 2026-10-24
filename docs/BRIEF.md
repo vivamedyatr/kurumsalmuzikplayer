@@ -49,7 +49,14 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 - **Tek bilgisayar:** aynı şube adıyla başka bilgisayardan girilirse eskisi en geç 15 dk içinde girişe döner.
 - **Yayın kaydı:** çalan şarkı, anons, açıldı/durdu; 15 dk'da bir `/api/offline/log`'a; internetsizken 7 güne kadar birikir.
 - **Güncelleme:** program kendini günceller; yeni sürüm arkada iner, **sadece program yeniden açılınca** kurulur, çalarken asla.
-- **Görünüm:** web yayın ekranının dili (2.0.15 tasarımı): koyu zemin, Archivo başlık, plak kapağı, Viva kırmızısı, IBM Plex Mono saatler, sekmeler (Şarkılar, Anonslar, Akış, Arşiv), altta gün bandı. 760×460, en az 640×400. Yazı tipleri programın içinde.
+- **Görünüm (karar Onur, 24 Eki 2026; 1.0.0-faz5.1):** web yayın ekranının dili, Spotify / YouTube Music düzeni
+  (`docs/tasarim/`): solda menü (Çalıyor, Bugünkü akış, Anonslar, Geçmiş, Arşiv) ve mağaza bilgisi; ortada albüm
+  kapağından yayılan renk üstünde büyük kapak ve Archivo Expanded tarz başlığı, bugünkü akış şeridi, sıradaki anons ve son
+  çalanlar; altta çalma çubuğu (durdurma yok, "Sonraki", CANLI, ses). Yazı tipleri programın içinde (Archivo, IBM Plex
+  Mono; OFL). **Pencere oranı sabit** (Onur: "tasarım bozulmasın"): içerik 1040×610 tasarım boyutunda tek parça
+  ölçeklenir, %72–%160 arası ve ekrana sığacak kadar; tam ekran düğmesi kapalı; Windows 10/11'de koyu başlık çubuğu.
+  Webp kapak açılamazsa (Windows 7) tarzın renkli kapağı görünür.
+- ~~**Görünüm:** web yayın ekranının dili (2.0.15 tasarımı): koyu zemin, Archivo başlık, plak kapağı, Viva kırmızısı, IBM Plex Mono saatler, sekmeler (Şarkılar, Anonslar, Akış, Arşiv), altta gün bandı. 760×460, en az 640×400. Yazı tipleri programın içinde.~~
 
 ## 3. Teknik yığın
 

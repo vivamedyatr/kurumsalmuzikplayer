@@ -226,9 +226,11 @@ public sealed class Announcer : IDisposable
         var plans = Announce.Plans.Where(p => active.Any(i => i.Plan == p)).ToList();
         var nm = Announce.NextTriggerMinute(plans, Clock.DayMinute(t), active);
         string? next = nm == null ? null : Announce.MinuteLabel(nm.Value);
+        var nextPlans = nm == null ? new List<string>() : plans.Where(p => Announce.Triggers(p, nm.Value, active.Where(i => i.Plan == p))).ToList();
         return new JObject
         {
             ["next"] = next,
+            ["nextWhat"] = string.Join(" · ", nextPlans.Select(p => $"Plan {Announce.PlanInfo[p].Code}")),
             ["plans"] = new JArray(plans.Select(p => new JObject
             {
                 ["label"] = Announce.PlanLabel(p),

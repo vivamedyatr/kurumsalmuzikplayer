@@ -46,6 +46,7 @@ Source: "{#Src}\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Src}\{#AppExe}.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Src}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Src}\mpv\*"; DestDir: "{app}\mpv"; Flags: ignoreversion recursesubdirs
+Source: "{#Src}\lisanslar\*"; DestDir: "{app}\lisanslar"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"

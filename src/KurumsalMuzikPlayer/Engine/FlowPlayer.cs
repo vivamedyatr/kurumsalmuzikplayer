@@ -275,7 +275,7 @@ sealed class FlowPlayer
         var genre = _decision?.GenreName ?? "";
         var album = _library()?.Current?.Albums.FirstOrDefault(a => a.Id == t.Album)?.Title ?? "";
         Log.Info($"Çalıyor: {t.Title} · {album}");
-        History.Add("music", t.Title, $"{album} · {genre}");
+        History.Add("music", t.Title, $"{album} · {genre}", t.Album);
         PlayLog.State(true);
         PlayLog.Song(t.Title, album, genre);
         if (Announcer != null) Announcer.Ready = true;
