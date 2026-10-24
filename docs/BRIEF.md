@@ -35,7 +35,7 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 | 2 | Arşiv koruması | ~~Seçenek A — sunucu şifreler~~ → **player bellekte şifreler, bilgisayara özel anahtar** (24 Eki 2026, §5). Albüm başına tek dosya; şifre bellekte çözülür. |
 | 3 | Kod imzalama | **Şimdilik yok** (imzasız). Kurulumda "bilinmeyen yayıncı" uyarısı çıkar. Antivirüs sorunu çıkarsa yeniden değerlendirilir. |
 | 4 | Geçiş | **Elle kurulum.** Müşteriler henüz Kurumsal Müzik Net'e taşınmadı; 2.x'ten otomatik geçiş yapılmaz. |
-| 5 | Ad | Her yerde **"Kurumsal Müzik Player"**; sürüm sadece pencerenin sağ altında ("Kurumsal Müzik Player 1.0.3"). Programda "by Viva Medya" + vivamedya.com bağlantısı. |
+| 5 | Ad | Her yerde **"Kurumsal Müzik Player"**. ~~Sürüm sadece pencerenin sağ altında; programda vivamedya.com bağlantısı.~~ → 1.0.0'da (yeni arayüz, 25 Eki 2026): sürüm sol menünün altında ("Sürüm 1.0.0") ve giriş ekranında; marka "MÜZİK · BY VIVA MEDYA"; giriş ekranında "Viva Medya · vivamedya.com" **yazısı** var ama tıklanır bağlantı yok (sonraki sürüm adayı, §9). |
 
 ### 2.2 Eski BRIEF'ten aynen geçen kararlar (özet; ayrıntı orada)
 
@@ -44,7 +44,7 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 - **Akış:** sadece tarz akışı; hesabın ortak "Offline akışı"; 7 günde bir değişir (sunucuda).
 - **Paket:** akış başına 6 GB, tarz başına en fazla 16 saat, albüm başına ilk 40 şarkı, 30 günde en fazla 5 albüm değişir (sunucuda).
 - **İndirme:** en fazla 6 Mbps; önce çalan tarz, sonra sıradaki, sonra diğerleri; kesilip devam eder; inerken çalar (tarz en az 3 şarkısı inince).
-- **İnternetsiz:** 7 gün. Sonra "İnternet bağlantısı gerekli" der ve durur. Lisans günde bir, akış saatte bir, anonslar 15 dk'da bir sorulur.
+- **İnternetsiz:** 7 gün. Sonra "7 gündür internete bağlanılamadı…" der ve durur. Lisans günde bir, akış saatte bir, anonslar 15 dk'da bir sorulur.
 - **Anonslar:** web'deki planlar aynen (P1–P6, PA/PB/PC, saatli **X/Y**); müzik anons sırasında duraklar, kaldığı saniyeden sürer. Anonslar şifresiz.
 - **Tek bilgisayar:** aynı şube adıyla başka bilgisayardan girilirse eskisi en geç 15 dk içinde girişe döner.
 - **Yayın kaydı:** çalan şarkı, anons, açıldı/durdu; 15 dk'da bir `/api/offline/log`'a; internetsizken 7 güne kadar birikir.
@@ -65,7 +65,7 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 | Çalışma ortamı | **.NET Framework 4.8** | Windows 10 (1903+) ve 11'de hazır gelir. ~~Windows 7 SP1/8.1'e kurulum dosyası ekler (çevrimdışı yükleyici pakette).~~ → Yoksa kurulum durur ve Microsoft'un indirme sayfasını açar (23 Eki 2026: .NET kurulumu yönetici izni ister, programın kurulumu istemez; 115 MB'lık yükleyiciyi her şubeye taşımamak için). Ek çalışma zamanı taşınmaz, program küçük kalır. |
 | Arayüz | **WPF** | Yerel Windows penceresi; tarayıcı motoru yok. Koyu tema, özel yazı tipleri, kapak görselleri rahat. Yazılımla çizim (eski ekran kartlarında takılmasın diye). |
 | Ses | **mpv.exe** (0.35, AVX2'siz x86_64) | 2.x'te Celeron/Win 8.1'de denendi. Ayrı süreç, JSON IPC (adlandırılmış boru). Müzik ve anons için iki mpv. |
-| Ağ | `HttpClient` (TLS 1.2 açıkça) | Windows 7'de TLS 1.2 kayıt defteri/güncelleme ihtiyacı kurulumda kontrol edilir. |
+| Ağ | `HttpClient` (TLS 1.2 açıkça) | Program TLS 1.2'yi açılışta kendisi açar. ~~Windows 7'de TLS 1.2 kayıt defteri/güncelleme ihtiyacı kurulumda kontrol edilir.~~ → Kurulumda ayrı bir kontrol **yapılmadı** (1.0.0); Windows 7 SP1'de bağlantı Onur'un testinde doğrulanır (`docs/TEST-LISTESI.md`), sorun çıkarsa sonraki sürümde eklenir. |
 | Gizli anahtar | Windows DPAPI (`ProtectedData`, kullanıcı kapsamı) | Cihaz anahtarı ve oturum. |
 | Kurulum | **Inno Setup** | Tek .exe (26 MB), kullanıcı bazlı (`%LOCALAPPDATA%\Programs\Kurumsal Müzik Player`), yönetici izni istemez, Türkçe. Kaldırınca inen arşiv ve şube kaydı da silinir. |
 | Geliştirme | .NET 8 SDK (SDK tarzı proje, `net48` hedefi) | Visual Studio şart değil; `dotnet build` ile derlenir. |
@@ -95,7 +95,9 @@ KurumsalMuzikPlayer.exe  (motor; görünmez, tepside)
   yeniden başlama: Windows Hata Bildirimi (`RegisterApplicationRestart`). Görev Zamanlayıcı'ya görev yazmak antivirüslerin
   "kalıcılık" diye işaretlediği bir davranış (23 Eki 2026, BRIEF §1 birinci gereksinim).
 - **Günlük:** `%LOCALAPPDATA%\Kurumsal Muzik Player\gunluk\` — dönen (en fazla 7 gün) metin günlüğü; donma, çökme,
-  indirme hatası gerçek sebebiyle yazılır. Uzaktan destekte "günlüğü gönder" (sunucuya, onayla).
+  indirme hatası gerçek sebebiyle yazılır (`motor-<gün>.txt`, `pencere-<gün>.txt`). ~~Uzaktan destekte "günlüğü gönder"
+  (sunucuya, onayla).~~ → 1.0.0'da yok: mağazadan tepsi simgesi → "Günlük klasörünü aç" ile dosyalar istenir (sonraki
+  sürüm adayı, §9). Sunucu yayın kaydından (panel → Yayın kayıtları) programın ne zaman çaldığı uzaktan görülür.
 - **Veri klasörü:** `%LOCALAPPDATA%\Kurumsal Muzik Player\` (eski programla karışmaz).
 
 ## 5. Arşiv koruması — ~~Seçenek A (23 Eki 2026)~~ → player şifreler, bilgisayara özel anahtar (karar Onur, 24 Eki 2026)
@@ -129,14 +131,15 @@ artık kullanılmıyor; **sonraki web yayınında kaldırılacak** (karar Onur 2
 
 ## 6. Sunucu API'si (hazır, değişmez)
 
-Hepsi `https://kurumsalmuzik.net`, `Authorization: Bearer <cihaz anahtarı>`, `X-App-Version` başlığıyla:
+Hepsi `https://kurumsalmuzik.net`, `Authorization: Bearer <cihaz anahtarı>`, `X-App-Version: 1.0.x` ve `X-App: kmp`
+başlıklarıyla (sonuncusu §7.1):
 
 | Yol | İş |
 |---|---|
 | `POST /api/offline/register` | Kullanıcı adı + şifre + şube adı → cihaz anahtarı (aynı şube adı eski bilgisayarı düşürür) |
-| `GET /api/offline/status` | Lisans, hesap süresi, cihaz geçerli mi (günde bir + 15 dk'da bir düşme kontrolü) |
-| `GET /api/offline/manifest` | Akış dilimleri, tarzlar, albümler, şarkılar, imzalı medya adresi ve süresi, paket döngüsü |
-| `GET /api/offline/announcements` | Anons planları ve dosyaları (saatli X/Y dahil) |
+| `GET /api/offline/status` | Lisans, hesap süresi, cihaz geçerli mi (günde bir; başarısızsa 15 dk'da bir yeniden) |
+| `POST /api/offline/manifest` | Akış dilimleri, tarzlar, albümler, şarkılar, imzalı medya adresi ve süresi, paket döngüsü (saatte bir; gövdede eldeki albümler ve "Aylık yeni müzik") |
+| `GET /api/offline/announcements` | Anons planları ve dosyaları (saatli X/Y dahil); 15 dk'da bir. **Düşme** (cihaz silindi / başka bilgisayardan girildi) bu sorgunun ya da paketin 401 cevabından anlaşılır → giriş ekranı |
 | `POST /api/offline/announcements/played` | Anons çalma bildirimleri (7 güne kadar geriye) |
 | `POST /api/offline/log` | Yayın kaydı (en fazla 5.000 olay/istek) |
 
@@ -149,13 +152,16 @@ Akış ve anons kuralları web'den **birebir** C#'a çevrilir ve web'in testleri
 ## 7. Kurumsal Müzik Net'e gereken ekler (her biri ayrı Onur onayıyla)
 
 1. **Program kimliği:** sunucu bugün `X-App-Version < 2.0.17` olan programa saatli X/Y anonslarını göndermiyor. 1.0
-   ayrı bir başlıkla kendini tanıtır (`X-App: kmp`); sunucu bu başlığı görünce sürüm karşılaştırmasını atlar. Panelde
-   cihaz "Offline · KMP 1.0.3" diye görünür.
+   ayrı bir başlıkla kendini tanıtır (`X-App: kmp`); sunucu bu başlığı görünce sürüm karşılaştırmasını atlar.
+   **Yapıldı** (web `7ce81e9`, canlı 23 Eki 2026). ~~Panelde cihaz "Offline · KMP 1.0.3" diye görünür.~~ → Panelde ayrı
+   bir "KMP" etiketi yapılmadı; cihaz 2.x gibi "Offline" + sürüm numarasıyla (1.0.x) görünür, 2.x'ten sürümle ayrılır.
 2. ~~**Worker "şifreli ver" kipi** (§5) ve manifestte paket anahtarı.~~ Yapıldı ve canlıya gitti (23 Eki), 24 Eki'de bırakıldı
    (şifreleme player'da); `/e/` ve `media.archive` sonraki web yayınında kaldırılır.
 3. **Güncelleme dosyası:** `kurumsalmuzik.net/indir/kmp/` altında sürüm bilgisi (`latest.json`: sürüm, yapı numarası,
    dosya adı, SHA-256, boyut) ve kurulum dosyası; `scripts/yayinla.sh` yükler (sunucuda `/var/www/indir/kmp`, nginx'te
    `/indir/` zaten açık — web projesinde değişiklik gerekmez). İndirme adresi `/indir/Kurumsal-Muzik-Player-Kurulum.exe` 1.0 yayına girince 1.0'ı gösterir (o güne kadar 2.0.17).
+   **Yapıldı:** ilk yayın 24 Eki 2026; 25 Eki 2026'dan beri sabit adres 1.0.0'ı veriyor ve `yayinla.sh` her yeni 1.0.x'te
+   onu da günceller. 2.x'in `/indir/latest.yml`'i ve `VM-Radio-Player-2.0-Kurulum.exe` 2.0.17'de kaldı.
 
 ## 8. Fazlar
 
@@ -174,7 +180,7 @@ açıkken 2 saat çalışır.
 *Kanıt: 3 Mbps hatta paket iner → internet kesilip gelince devam eder → program hiç donmaz → klasör başka bilgisayara kopyalanınca çalmaz.*
 
 **Faz 3 — Çalma, anonslar, internetsiz 7 gün.** Tarz akışı, gün bandı, ses, sonraki, geçmiş, anonslar (X/Y dahil), lisans, yayın kaydı.
-*Kanıt: interneti kes → akış saatinde tarz değişir, anons zamanında çalar → saat 8 gün ileri alınınca "İnternet bağlantısı gerekli" → internet gelince devam.*
+*Kanıt: interneti kes → akış saatinde tarz değişir, anons zamanında çalar → saat 8 gün ileri alınınca "7 gündür internete bağlanılamadı" → internet gelince devam.*
 
 **Faz 4 — Akış değişimi, paket döngüsü, kendini güncelleme.**
 *Kanıt: web'den akış değiştir → program çalmayı kesmeden yeni tarzı indirip geçer → yeni sürüm yayınlanınca program yeniden açılışta güncellenir.*
@@ -183,9 +189,27 @@ açıkken 2 saat çalışır.
 **1.0.0** yayınlanır, Onur farklı Windows ortamlarında kendisi test eder (`docs/TEST-LISTESI.md`), hata bulunursa yeni sürümle
 düzeltilir. ~~Gerçek bir mağazada bir hafta~~; indirme adresinin 1.0'a çevrilmesi.
 
-## 9. Açık sorular (Onur karar verir)
+## 9. Açık sorular ve sonraki sürüm adayları (25 Eki 2026)
 
-Şu an yok. Fazlar ilerledikçe buraya yazılır.
+**Kararı Onur'da olanlar** (ayrıntı `docs/TEST-LISTESI.md` §6):
+1. **Cloudflare Workers Paid** (aylık 5 $): aynı gün ~15'ten fazla şube kurulacaksa önce geçilmeli (§5).
+2. **Web temizliği:** Worker'daki `/e/` ve manifestteki `media.archive` sonraki web yayınında kaldırılır (onay bekliyor).
+3. **2.x'in güncelleme dosyası** (`/indir/latest.yml`) ve eski adlı `VM-Radio-Player-2.0-Kurulum.exe`: 2.0.17'de mi
+   kalsın, yoksa son bir 2.x sürümüyle 1.0'a mı yönlendirilsin.
+4. **Eski Java programın müşterileri** (sunucusu yıl sonunda kapanıyor): Kurumsal Müzik Net hesabı + 1.0 ile geçiş planı.
+5. **Kod imzalama:** antivirüs/SmartScreen sorunu çıkarsa yeniden değerlendirilir (§2.1 #3).
+
+**Programda olmayanlar — sonraki sürüm adayları** (Onur'un testlerine göre sıralanır; her biri ayrı onayla):
+- Giriş ekranında ya da menüde tıklanır vivamedya.com bağlantısı (§2.1 #5).
+- Sessize alma düğmesi (bugün sadece ses kaydırıcısı var).
+- Windows 7'de TLS 1.2 / kök sertifika eksikse kurulumda ya da girişte açık bir uyarı (§3).
+- "Günlüğü gönder" (uzaktan destek için günlüğü sunucuya yükleme, §4).
+
+**Bilinen sınırlar:**
+- Saat geri alınırsa: 7 gün kuralı son başarılı bağlantı ve sunucudan öğrenilen saat farkıyla işler; internet yokken
+  bilgisayar saati geri alınarak süre uzatılabilir (2.x'te de aynıydı). Bağlantı gelince düzelir.
+- Windows 7 webp kapak açamaz; tarzın renk geçişi görünür.
+- Program kaldırılınca veri klasörü de silinir (§3 Kurulum): yeniden kurulumda arşiv baştan iner.
 
 ## 10. Durum
 
@@ -196,4 +220,8 @@ Kanıt senaryoları mağaza denemesi yerine Onur'un kendi testlerinde (karar 25 
 - [x] Faz 2 — İndirme ve arşiv (program tarafı yapıldı ve yerel sunucu + yerel Worker ile denendi, 23 Eki 2026: şifreli indirme, albüm kapları, yarıda kesilip devam, arşivden çalma. 24 Eki 2026: şifreleme player'a taşındı (1.0.0-faz2.2), canlı sunucuyla Onur'un bilgisayarında indiriyor ve arşivden çalıyor; kanıt senaryosu bekliyor)
 - [x] Faz 3 — Çalma, anonslar, internetsiz 7 gün (yapıldı, 24 Eki 2026, 1.0.0-faz3: saat dilimine göre tarz, inmemiş tarz yerine inmiş olan, anons kuşağı ikinci mpv'de ve müzik kaldığı saniyeden sürer, anons kuralları web'le birebir ve aynı testlerle, 7 gün kuralı, geçmiş, yayın kaydı; pencerede kapak, gün bandı, Geçmiş ve Anonslar sekmeleri. Canlıda Onur'un bilgisayarında çalışıyor; kanıt senaryosu bekliyor)
 - [x] Faz 4 — Akış değişimi, paket döngüsü, güncelleme (program tarafı yapıldı, 24 Eki 2026, 1.0.0-faz4.1: "Akışı düzenle" web'i açar ve paketi 2/5/10/20 dk sonra erken sorar; "Aylık yeni müzik" anahtarı; eski tarzlar yenisi inene kadar çalar, pakette olmayan albümler paket tamamen inince silinir; kendini güncelleme yerel adresle denendi: arkada iner, SHA-256 doğrulanır, yeniden açılışta ~10 sn'de kurulur ve program kendiliğinden açılır. İlk canlı yayın 24 Eki 2026: 1.0.0-faz4.1 (yapı 41), 25 Eki 2026: 1.0.0-faz5.1 (yapı 51, yeni arayüz) `/indir/kmp/`'de, SHA-256 doğrulandı; 2.x'in latest.yml'i ve sabit indirme adresi değişmedi. Kanıt senaryosu bekliyor)
-- [x] Faz 5 — Final sürüm 1.0.0 (25 Eki 2026, yapı 100, `/indir/kmp/`'de; sitedeki sabit indirme adresi de 1.0.0'ı veriyor). Mağazada deneme yok (karar Onur); testler Onur'da, `docs/TEST-LISTESI.md`. Dağıtım kararları (sabit indirme adresi, Workers Paid, web temizliği) aynı belgenin 6. bölümünde
+- [x] Faz 5 — Final sürüm 1.0.0 (25 Eki 2026, yapı 100, `/indir/kmp/`'de; sitedeki sabit indirme adresi de 1.0.0'ı veriyor; GitHub etiketi `v1.0.0`). Mağazada deneme yok (karar Onur); testler Onur'da, `docs/TEST-LISTESI.md`. Açık kararlar ve sonraki sürüm adayları §9'da.
+
+**Belgeler (25 Eki 2026'da güncellendi):** bu BRIEF; derleme ve deneme `docs/KURULUM.md`; test rehberi
+`docs/TEST-LISTESI.md`; sunucu, yayın ve mağaza kurulumu dahil her şey `../kurumsalmuzik/docs/KURULUM-KILAVUZU.html` §12
+(kopyası proje kökünde); web tarafı test listesi kökteki `TEST-LISTESI.html` (offline bölümü 1.0'a göre).

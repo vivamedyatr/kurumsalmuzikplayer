@@ -1,7 +1,11 @@
 # Derleme ve deneme
 
+Sunucu, yayın ve mağaza kurulumu dahil bütün sistem: `../kurumsalmuzik/docs/KURULUM-KILAVUZU.html` §12.
+
 ## Gerekenler (geliştirme bilgisayarı)
 - .NET 8 SDK (`winget install Microsoft.DotNet.SDK.8`). Program .NET Framework 4.8 hedefler; SDK sadece derlemek için.
+- Inno Setup 6 (kurulum dosyası), Git Bash ve Tailscale (yayın betiği sunucuya `onur@kurumsalmuzik-vps.tail8660b4.ts.net`
+  ile bağlanır; Tailscale kapalıysa ofisten `KM_HOST=onur@2.24.171.101`).
 - `vendor/mpv/mpv.exe` — git'e girmez (84 MB). Kaynağı ve sürümü: `vendor/mpv/MPV-LISANS.txt`
   (mpv 0.35, shinchiro derlemesi `mpv-x86_64-20230101-git-ad65c88.7z`; eski projenin `vendor/` klasöründe arşiviyle duruyor).
 
@@ -25,6 +29,7 @@ Sessiz kurulum: `/VERYSILENT /SUPPRESSMSGBOXES`. Kurulum ve kaldırma çalışan
 2. `powershell -ExecutionPolicy Bypass -File scripts\kurulum.ps1`
 3. `bash scripts/yayinla.sh` (Onur onayıyla) → `kurumsalmuzik.net/indir/kmp/latest.json` + kurulum dosyası; sitedeki sabit
    adres `/indir/Kurumsal-Muzik-Player-Kurulum.exe` de son sürüme çevrilir.
+4. Commit, `git tag v<sürüm>`, `git push --follow-tags` (GitHub `vivamedyatr/kurumsalmuzikplayer`).
 Kurulu programlar 4 saatte bir bakar, arkada indirir, SHA-256'yı doğrular, **yeniden açılışta** (müzik başlamadan) sessiz
 kurar ve kendiliğinden açılır. 3 başarısız denemeden sonra o sürüm atlanır. 2.x'in `/indir/latest.yml`'ine dokunulmaz.
 Yerel deneme: `$env:KMP_GUNCELLEME_URL = "http://127.0.0.1:8765/kmp/latest.json"` ve o klasörü sunan bir HTTP sunucusu.
@@ -52,7 +57,7 @@ gerekir; ikisi de sadece bilgisayardaki taklit R2'yi kullanır.
 ## Programın klasörleri
 `%LOCALAPPDATA%\Kurumsal Muzik Player\` (`KMP_DATA_DIR` ortam değişkeniyle değiştirilebilir):
 - `gunluk\motor-yyyy-MM-dd.txt`, `gunluk\pencere-yyyy-MM-dd.txt` — 7 gün tutulur
-- `ayarlar.json` — ses düzeyi
+- `ayarlar.json` — ses düzeyi · `pencere.json` — pencerenin yeri ve ölçeği
 - `cihaz.bin` — şube kaydı ve sunucu anahtarı (DPAPI ile şifreli; başka kullanıcı/bilgisayarda açılmaz)
 - `paket.json` — son offline paket (akış dilimleri, albümler, şarkılar)
 - `cihaz-paket.json` — bu bilgisayarın albüm listesi ve "Aylık yeni müzik" anahtarı
@@ -64,6 +69,8 @@ gerekir; ikisi de sadece bilgisayardaki taklit R2'yi kullanır.
 - `durum.json` — saat farkı, son başarılı bağlantı, hizmet son günü (7 gün kuralı)
 - `gecmis.json` — çalma geçmişi (7 gün) · `kayit-kuyrugu.json` — yayın kaydı kuyruğu (15 dk'da bir gider)
 - `deneme-arsiv\` — Faz 0 dayanıklılık deneyinin yazdığı sahte arşiv (her deneyde silinip baştan yazılır)
+
+Program kaldırılınca bu klasör de silinir (kurulum betiği `[UninstallDelete]`); güncelleme ona dokunmaz.
 
 ## Faz 0 dayanıklılık deneyi
 Motor, müzik çalarken gerçek indirme gibi arşiv yazar ve geri okur:

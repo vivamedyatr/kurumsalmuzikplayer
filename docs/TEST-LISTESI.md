@@ -17,7 +17,8 @@ Aşağıdaki liste bu testler için bir rehberdir.
 
 ## 2. Kurulum
 
-1. Kurulum dosyası: `https://kurumsalmuzik.net/indir/kmp/Kurumsal-Muzik-Player-Kurulum-1.0.0.exe` (her zaman son sürüm: `/indir/kmp/latest.json`).
+1. Kurulum dosyası: `https://kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe` (her zaman son 1.0 sürümü; sürümlü
+   dosyalar `/indir/kmp/`'de, son sürüm bilgisi `/indir/kmp/latest.json`).
 2. "Windows kişisel bilgisayarınızı korudu" çıkarsa: **Ek bilgi → Yine de çalıştır** (imzasız program, karar).
 3. Kurulum yönetici izni istemez; bitince program açılır → **şube girişi**: kullanıcı adı, şifre, şube adı.
 4. Panelde cihaz **Offline · 1.0.x** olarak görünür. Paket iner (en fazla 6 Mbps; 6 GB ≈ 2–3 saat), ilk şarkılar
@@ -38,6 +39,9 @@ Aşağıdaki liste bu testler için bir rehberdir.
 | 9 | (İsteğe bağlı, deneme sonunda) Bilgisayar saatini 8 gün ileri al | "7 gündür internete bağlanılamadı…" yazar, müzik durur. Saat düzelip internet gelince sürer. |
 | 10 | Claude yeni bir sürüm yayınlar (bir düzeltme gelince) | 4 saat içinde arkada iner; ertesi açılışta (ya da yeniden başlatınca) ~10 sn'de kurulur, program kendiliğinden açılır. |
 | 11 | Arşiv klasörünü (`%LOCALAPPDATA%\Kurumsal Muzik Player\arsiv`) başka bilgisayara kopyala | Orada açılmaz (anahtar bilgisayara özel). |
+| 12 | **Windows 7 SP1:** kurulumdan sonra giriş yap (güncellemeleri az bir Windows 7'de de dene) | Sunucuya bağlanır (TLS 1.2). Bağlanamazsa: günlükteki hata satırı + Windows Update durumu → bana. 1.0.0'da bunun için ayrı bir kontrol/uyarı yok (BRIEF §9). |
+| 13 | Pencereyi kenarından büyüt/küçült, başka ekrana taşı, kapat-aç | Oranı bozulmadan ölçeklenir; yeri ve boyutu hatırlanır. |
+| 14 | Programı kaldır, yeniden kur | Kaldırma veri klasörünü de siler: yeniden giriş ister, arşiv baştan iner (beklenen davranış). |
 
 ## 4. Uzaktan izleme (panelden)
 
@@ -55,6 +59,14 @@ Aşağıdaki liste bu testler için bir rehberdir.
 - [ ] Yeni sürüm kendiliğinden kuruldu; giriş, arşiv ve ses düzeyi korundu.
 - [ ] Antivirüs uyarısı yok (varsa: hangi program, ne dedi — ekran görüntüsü).
 - [ ] Ses, pencere, açılış: kullanırken rahatsız eden bir şey yok.
+
+## 5.1 1.0.0'da bilerek olmayanlar (sonraki sürüm adayları, BRIEF §9)
+
+Testte eksik olarak not edilebilir; öncelik Onur'un:
+- Tıklanır vivamedya.com bağlantısı (giriş ekranında sadece yazı olarak var).
+- Sessize alma düğmesi (ses kaydırıcısı var).
+- Windows 7'de TLS/sertifika eksikliği için açık uyarı.
+- "Günlüğü gönder" (bugün günlük dosyaları elle istenir).
 
 ## 6. Dağıtım (her biri Onur'un kararı)
 
