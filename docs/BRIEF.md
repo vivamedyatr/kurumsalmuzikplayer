@@ -179,7 +179,9 @@ açıkken 2 saat çalışır.
 **Faz 4 — Akış değişimi, paket döngüsü, kendini güncelleme.**
 *Kanıt: web'den akış değiştir → program çalmayı kesmeden yeni tarzı indirip geçer → yeni sürüm yayınlanınca program yeniden açılışta güncellenir.*
 
-**Faz 5 — Mağazada deneme ve dağıtım.** Gerçek bir mağazada bir hafta; indirme adresinin 1.0'a çevrilmesi.
+**Faz 5 — ~~Mağazada deneme~~ → final sürüm ve dağıtım** (karar Onur, 25 Eki 2026): mağazada deneme yapılmaz; final
+**1.0.0** yayınlanır, Onur farklı Windows ortamlarında kendisi test eder (`docs/TEST-LISTESI.md`), hata bulunursa yeni sürümle
+düzeltilir. ~~Gerçek bir mağazada bir hafta~~; indirme adresinin 1.0'a çevrilmesi.
 
 ## 9. Açık sorular (Onur karar verir)
 
@@ -187,9 +189,11 @@ açıkken 2 saat çalışır.
 
 ## 10. Durum
 
-- [ ] Faz 0 — İskelet ve kanıt deneyi (iskelet hazır, 23 Eki 2026: motor/pencere/mpv ayrı süreç, bekçiler denendi — pencere donunca 15 sn'de yeniden açılır, mpv çökünce 2 sn'de kaldığı yerden sürer, motor çökünce mpv de kapanır ve pencere motoru ~10 sn'de yeniden başlatır; ilk dayanıklılık denemesi Onur'un Kaspersky + Acronis'li bilgisayarında 9 dk, 0,41 GB albüm kabı yazımı: donma yok, Windows 1000/1002 kaydı yok, antivirüs uyarısı yok — 2.x bu bilgisayarda 0–7 dk içinde donuyordu; 24 saatlik kanıt bekliyor)
-- [ ] Faz 1 — Giriş ve cihaz (yapıldı, 23 Eki 2026: kurulum dosyası, giriş ekranı, cihaz kaydı DPAPI ile, 15 dk'da bir durum sorgusu, düşme, süre dolması, Windows'la başlama; yerel sunucuyla uçtan uca ve kur/güncelle/kaldır denendi. Onur'un Windows 7 ve 11 kanıtı bekliyor)
-- [ ] Faz 2 — İndirme ve arşiv (program tarafı yapıldı ve yerel sunucu + yerel Worker ile denendi, 23 Eki 2026: şifreli indirme, albüm kapları, yarıda kesilip devam, arşivden çalma. 24 Eki 2026: şifreleme player'a taşındı (1.0.0-faz2.2), canlı sunucuyla Onur'un bilgisayarında indiriyor ve arşivden çalıyor; kanıt senaryosu bekliyor)
-- [ ] Faz 3 — Çalma, anonslar, internetsiz 7 gün (yapıldı, 24 Eki 2026, 1.0.0-faz3: saat dilimine göre tarz, inmemiş tarz yerine inmiş olan, anons kuşağı ikinci mpv'de ve müzik kaldığı saniyeden sürer, anons kuralları web'le birebir ve aynı testlerle, 7 gün kuralı, geçmiş, yayın kaydı; pencerede kapak, gün bandı, Geçmiş ve Anonslar sekmeleri. Canlıda Onur'un bilgisayarında çalışıyor; kanıt senaryosu bekliyor)
-- [ ] Faz 4 — Akış değişimi, paket döngüsü, güncelleme (program tarafı yapıldı, 24 Eki 2026, 1.0.0-faz4.1: "Akışı düzenle" web'i açar ve paketi 2/5/10/20 dk sonra erken sorar; "Aylık yeni müzik" anahtarı; eski tarzlar yenisi inene kadar çalar, pakette olmayan albümler paket tamamen inince silinir; kendini güncelleme yerel adresle denendi: arkada iner, SHA-256 doğrulanır, yeniden açılışta ~10 sn'de kurulur ve program kendiliğinden açılır. İlk canlı yayın 24 Eki 2026: 1.0.0-faz4.1 (yapı 41), 25 Eki 2026: 1.0.0-faz5.1 (yapı 51, yeni arayüz) `/indir/kmp/`'de, SHA-256 doğrulandı; 2.x'in latest.yml'i ve sabit indirme adresi değişmedi. Kanıt senaryosu bekliyor)
-- [ ] Faz 5 — Mağazada deneme ve dağıtım (hazırlık 24 Eki 2026: pencere yeri/boyutu hatırlanıyor, cihaz kodu pencerede; deneme kılavuzu ve kanıt listesi `docs/MAGAZA-DENEMESI.md`; mağaza seçimi ve dağıtım kararları Onur'da)
+Kanıt senaryoları mağaza denemesi yerine Onur'un kendi testlerinde (karar 25 Eki 2026; `docs/TEST-LISTESI.md`).
+
+- [x] Faz 0 — İskelet ve kanıt deneyi (iskelet hazır, 23 Eki 2026: motor/pencere/mpv ayrı süreç, bekçiler denendi — pencere donunca 15 sn'de yeniden açılır, mpv çökünce 2 sn'de kaldığı yerden sürer, motor çökünce mpv de kapanır ve pencere motoru ~10 sn'de yeniden başlatır; ilk dayanıklılık denemesi Onur'un Kaspersky + Acronis'li bilgisayarında 9 dk, 0,41 GB albüm kabı yazımı: donma yok, Windows 1000/1002 kaydı yok, antivirüs uyarısı yok — 2.x bu bilgisayarda 0–7 dk içinde donuyordu; 24 saatlik kanıt bekliyor)
+- [x] Faz 1 — Giriş ve cihaz (yapıldı, 23 Eki 2026: kurulum dosyası, giriş ekranı, cihaz kaydı DPAPI ile, 15 dk'da bir durum sorgusu, düşme, süre dolması, Windows'la başlama; yerel sunucuyla uçtan uca ve kur/güncelle/kaldır denendi. Onur'un Windows 7 ve 11 kanıtı bekliyor)
+- [x] Faz 2 — İndirme ve arşiv (program tarafı yapıldı ve yerel sunucu + yerel Worker ile denendi, 23 Eki 2026: şifreli indirme, albüm kapları, yarıda kesilip devam, arşivden çalma. 24 Eki 2026: şifreleme player'a taşındı (1.0.0-faz2.2), canlı sunucuyla Onur'un bilgisayarında indiriyor ve arşivden çalıyor; kanıt senaryosu bekliyor)
+- [x] Faz 3 — Çalma, anonslar, internetsiz 7 gün (yapıldı, 24 Eki 2026, 1.0.0-faz3: saat dilimine göre tarz, inmemiş tarz yerine inmiş olan, anons kuşağı ikinci mpv'de ve müzik kaldığı saniyeden sürer, anons kuralları web'le birebir ve aynı testlerle, 7 gün kuralı, geçmiş, yayın kaydı; pencerede kapak, gün bandı, Geçmiş ve Anonslar sekmeleri. Canlıda Onur'un bilgisayarında çalışıyor; kanıt senaryosu bekliyor)
+- [x] Faz 4 — Akış değişimi, paket döngüsü, güncelleme (program tarafı yapıldı, 24 Eki 2026, 1.0.0-faz4.1: "Akışı düzenle" web'i açar ve paketi 2/5/10/20 dk sonra erken sorar; "Aylık yeni müzik" anahtarı; eski tarzlar yenisi inene kadar çalar, pakette olmayan albümler paket tamamen inince silinir; kendini güncelleme yerel adresle denendi: arkada iner, SHA-256 doğrulanır, yeniden açılışta ~10 sn'de kurulur ve program kendiliğinden açılır. İlk canlı yayın 24 Eki 2026: 1.0.0-faz4.1 (yapı 41), 25 Eki 2026: 1.0.0-faz5.1 (yapı 51, yeni arayüz) `/indir/kmp/`'de, SHA-256 doğrulandı; 2.x'in latest.yml'i ve sabit indirme adresi değişmedi. Kanıt senaryosu bekliyor)
+- [x] Faz 5 — Final sürüm 1.0.0 (25 Eki 2026, yapı 100, `/indir/kmp/`'de). Mağazada deneme yok (karar Onur); testler Onur'da, `docs/TEST-LISTESI.md`. Dağıtım kararları (sabit indirme adresi, Workers Paid, web temizliği) aynı belgenin 6. bölümünde

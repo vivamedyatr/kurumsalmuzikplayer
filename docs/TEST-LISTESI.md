@@ -1,26 +1,29 @@
-# Faz 5 — Mağazada deneme (bir hafta) ve dağıtım hazırlığı
+# Test listesi — Kurumsal Müzik Player 1.0
 
-Amaç: Kurumsal Müzik Player 1.0'ın gerçek bir mağazada, gerçek bilgisayarda ve gerçek internetle bir hafta boyunca
-**donmadan, susmadan** çaldığını görmek; Faz 2–4'ün kanıt senaryolarını orada çalıştırmak; sonra dağıtıma geçmek.
+**Karar (Onur, 25 Eki 2026):** mağazada deneme yapılmaz. Final sürüm **1.0.0** yayınlanır; Onur testleri farklı
+senaryolarda ve farklı Windows ortamlarında (7, 8.1, 10, 11; farklı antivirüsler) kendisi yapar. Hata bulunursa yeni
+sürümle düzeltilir; kurulu programlar yeni sürümü kendiliğinden alır (en geç 4 saatte iner, yeniden açılışta kurulur).
 
-## 1. Hazırlık (Onur, panelde)
+Aşağıdaki liste bu testler için bir rehberdir.
 
-- [ ] Mağaza seçildi: ______________________ (tercihen 2.x'in donduğu türden bir bilgisayar: Kaspersky/Acronis ya da eski Windows)
+## 1. Hazırlık (panelde)
+
+- [ ] Deneme bilgisayarları: Windows 7 SP1, 8.1, 10, 11 (64 bit); en az birinde Kaspersky ve/veya Acronis.
 - [ ] Hesapta "offline" izni açık, bir boş cihaz hakkı var (deneme bitince silinir).
 - [ ] Hesabın **Offline akışı** kurulu (tarz akışı, 08–24 dilimleri); en az 4 tarz.
 - [ ] Hesaba en az bir aralıklı (ör. Plan 2, 5 dk) ve bir **saatli** (Plan X, ör. 09:00 ve 13:30) anons atanmış.
-- [ ] Mağaza bilgisayarı: Windows 7 SP1 / 8.1 / 10 / 11, **64 bit**, en az 10 GB boş disk, ses çıkışı bağlı.
+- [ ] Her bilgisayarda: **64 bit** Windows, en az 10 GB boş disk, ses çıkışı bağlı.
   Windows 7/8.1'de .NET Framework 4.8 yoksa kurulum söyler (yönetici izniyle Microsoft'tan kurulur).
 
-## 2. Kurulum (mağazada ya da uzaktan)
+## 2. Kurulum
 
-1. Kurulum dosyası: `https://kurumsalmuzik.net/indir/kmp/` altındaki son sürüm (Claude yayınlar; adresi Onur'a verir).
+1. Kurulum dosyası: `https://kurumsalmuzik.net/indir/kmp/Kurumsal-Muzik-Player-Kurulum-1.0.0.exe` (her zaman son sürüm: `/indir/kmp/latest.json`).
 2. "Windows kişisel bilgisayarınızı korudu" çıkarsa: **Ek bilgi → Yine de çalıştır** (imzasız program, karar).
 3. Kurulum yönetici izni istemez; bitince program açılır → **şube girişi**: kullanıcı adı, şifre, şube adı.
 4. Panelde cihaz **Offline · 1.0.x** olarak görünür. Paket iner (en fazla 6 Mbps; 6 GB ≈ 2–3 saat), ilk şarkılar
    inince yayın başlar.
 
-## 3. Birinci gün: kanıt senaryoları (Faz 2–4)
+## 3. Senaryolar (Faz 2–4'ün kanıtları)
 
 | # | Ne yapılır | Ne görülmeli |
 |---|---|---|
@@ -33,10 +36,10 @@ Amaç: Kurumsal Müzik Player 1.0'ın gerçek bir mağazada, gerçek bilgisayard
 | 7 | "Akışı düzenle" → web'de bir dilimin tarzını değiştir | En geç 20 dk içinde program yeni tarzı indirmeye başlar; o inene kadar eldeki tarzlar çalar. |
 | 8 | İnterneti kes, 1 saat bekle | Akış ve anonslar internetsiz sürer; ekranda "İnternet yok: N gün daha çalar". |
 | 9 | (İsteğe bağlı, deneme sonunda) Bilgisayar saatini 8 gün ileri al | "7 gündür internete bağlanılamadı…" yazar, müzik durur. Saat düzelip internet gelince sürer. |
-| 10 | Deneme haftasında Claude yeni bir sürüm yayınlar | 4 saat içinde arkada iner; ertesi açılışta (ya da yeniden başlatınca) ~10 sn'de kurulur, program kendiliğinden açılır. |
+| 10 | Claude yeni bir sürüm yayınlar (bir düzeltme gelince) | 4 saat içinde arkada iner; ertesi açılışta (ya da yeniden başlatınca) ~10 sn'de kurulur, program kendiliğinden açılır. |
 | 11 | Arşiv klasörünü (`%LOCALAPPDATA%\Kurumsal Muzik Player\arsiv`) başka bilgisayara kopyala | Orada açılmaz (anahtar bilgisayara özel). |
 
-## 4. Hafta boyunca uzaktan izleme (Onur, panelden; mağazaya gitmeden)
+## 4. Uzaktan izleme (panelden)
 
 - **Panel → hesap → Yayın kayıtları:** günlük çalan şarkılar, yayının açık/kapalı olduğu saatler. Boşluk = sorun.
 - **Panel → hesap → cihazlar:** son bağlantı ve sürüm (1.0.x). Sürüm güncellemeden sonra kendiliğinden artmalı.
@@ -44,18 +47,18 @@ Amaç: Kurumsal Müzik Player 1.0'ın gerçek bir mağazada, gerçek bilgisayard
 - Sorun bildirilirse mağazadan: tepsi simgesi → **Günlük klasörünü aç** → o günün `motor-…txt` ve `pencere-…txt` dosyaları.
   Uzaktan bağlantı varsa (Tailscale / AnyDesk) Claude Windows olay günlüğüne de bakar (donma kaydı 1002, çökme 1000).
 
-## 5. Başarı ölçütleri (hafta sonunda)
+## 5. Bakılacaklar
 
-- [ ] 7 gün boyunca pencere ya da program donmadı (Windows günlüğünde KurumsalMuzikPlayer için 1000/1002 yok).
+- [ ] Pencere ya da program donmadı (Windows günlüğünde KurumsalMuzikPlayer için 1000/1002 yok).
 - [ ] Yayın kaydında mağazanın açık olduğu saatlerde boşluk yok.
 - [ ] Anonslar zamanında çaldı ve panele düştü.
 - [ ] Yeni sürüm kendiliğinden kuruldu; giriş, arşiv ve ses düzeyi korundu.
 - [ ] Antivirüs uyarısı yok (varsa: hangi program, ne dedi — ekran görüntüsü).
-- [ ] Mağaza personeli için şikâyet yok (ses, pencere, açılış).
+- [ ] Ses, pencere, açılış: kullanırken rahatsız eden bir şey yok.
 
-## 6. Dağıtım (deneme başarılı olunca; her biri Onur'un kararı)
+## 6. Dağıtım (her biri Onur'un kararı)
 
-1. **Sürüm adı:** "1.0.0-faz…" yerine **1.0.0** (yapı numarası artarak sürer).
+1. **Sürüm adı:** **1.0.0** (yapı 100; 25 Eki 2026). Düzeltmeler 1.0.1, 1.0.2… (yapı numarası her yayında artar).
 2. **Sabit indirme adresi:** `kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe` bugün 2.0.17'yi veriyor;
    1.0'a çevrilir (müşteri e-postaları ve sitedeki bağlantılar bu adresi kullanıyor). 2.x'in güncelleme dosyası
    (`/indir/latest.yml`) ayrıca bir karar: 2.0.17'ler olduğu gibi kalır ya da son bir 2.x sürümüyle 1.0'a yönlendirilir.
