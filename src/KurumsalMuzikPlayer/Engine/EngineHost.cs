@@ -88,6 +88,7 @@ sealed class EngineHost : ApplicationContext
         _heartbeat.Start();
         new Thread(StallWatch) { IsBackground = true, Name = "motor-bekci" }.Start();
 
+        Updater.Start();
         _stateTimer = new System.Threading.Timer(_ => SendState(), null, 500, 1000);
         _reportTimer = new System.Threading.Timer(_ => Log.Info("Durum: " + Report()), null, 600_000, 600_000);
 
@@ -161,6 +162,11 @@ sealed class EngineHost : ApplicationContext
         }
     }
 
+    Library? CurrentLibrary()
+    {
+        lock (_libraryGate) return _library;
+    }
+
     void StopLibrary()
     {
         Library? lib;
@@ -211,6 +217,13 @@ sealed class EngineHost : ApplicationContext
             case "next":
                 _music.Skip();
                 break;
+            case "flow-edit":
+                Log.Info("Akışı düzenle açıldı; paket birkaç kez erken sorulacak");
+                CurrentLibrary()?.RefreshAfterFlowEdit();
+                break;
+            case "updates":
+                CurrentLibrary()?.SetUpdates((bool?)m["on"] ?? true);
+                break;
         }
     }
 
@@ -228,6 +241,7 @@ sealed class EngineHost : ApplicationContext
                 announcer = _announcer;
             }
             s["library"] = lib?.Describe();
+            s["updateReady"] = Updater.ReadyVersion();
             s["schedule"] = announcer?.Schedule();
             s["history"] = new JArray(History.Recent(40).Select(h => new JObject
             {

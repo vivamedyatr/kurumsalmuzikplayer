@@ -11,6 +11,11 @@ public static class AppInfo
         (Assembly.GetEntryAssembly() ?? typeof(AppInfo).Assembly)
         .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "?";
 
+    /// <summary>Güncelleme karşılaştırması için artan yapı numarası (FileVersion'ın son parçası, örn. 1.0.0.40 → 40).</summary>
+    public static int Build { get; } =
+        System.Version.TryParse((Assembly.GetEntryAssembly() ?? typeof(AppInfo).Assembly)
+            .GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "", out var v) ? Math.Max(0, v.Revision) : 0;
+
     public static string Describe()
     {
         string net;
@@ -20,7 +25,7 @@ public static class AppInfo
             net = key?.GetValue("Release")?.ToString() ?? "?";
         }
         catch { net = "?"; }
-        return $"{AppPaths.ProductName} {Version}, Windows {Environment.OSVersion.Version}, .NET Framework sürüm kodu {net}, "
+        return $"{AppPaths.ProductName} {Version} (yapı {Build}), Windows {Environment.OSVersion.Version}, .NET Framework sürüm kodu {net}, "
              + $"{(Environment.Is64BitProcess ? "64" : "32")} bit, {Environment.ProcessorCount} çekirdek";
     }
 }

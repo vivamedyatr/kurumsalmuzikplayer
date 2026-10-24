@@ -20,6 +20,14 @@ Derler, testleri çalıştırır, `dist\Kurumsal-Muzik-Player-Kurulum-<sürüm>.
 betik `installer\KurumsalMuzikPlayer.iss`). Sürüm `Directory.Build.props` → `InformationalVersion`.
 Sessiz kurulum: `/VERYSILENT /SUPPRESSMSGBOXES`. Kurulum ve kaldırma çalışan programı önce `--kapat` ile kapatır.
 
+## Yeni sürüm yayınlamak (kendini güncelleme)
+1. `Directory.Build.props`: `InformationalVersion` (görünen sürüm) ve `FileVersion`'ın son parçası (yapı; her yayında artar).
+2. `powershell -ExecutionPolicy Bypass -File scripts\kurulum.ps1`
+3. `bash scripts/yayinla.sh` (Onur onayıyla) → `kurumsalmuzik.net/indir/kmp/latest.json` + kurulum dosyası.
+Kurulu programlar 4 saatte bir bakar, arkada indirir, SHA-256'yı doğrular, **yeniden açılışta** (müzik başlamadan) sessiz
+kurar ve kendiliğinden açılır. 3 başarısız denemeden sonra o sürüm atlanır. 2.x'in `/indir/latest.yml`'ine dokunulmaz.
+Yerel deneme: `$env:KMP_GUNCELLEME_URL = "http://127.0.0.1:8765/kmp/latest.json"` ve o klasörü sunan bir HTTP sunucusu.
+
 ## Yerel sunucuyla deneme
 Program canlı sunucu yerine yerel geliştirme sunucusuna bağlanabilir (`../kurumsalmuzik`: `npm run db`, `npm run dev`):
 ```
@@ -51,6 +59,7 @@ gerekir; ikisi de sadece bilgisayardaki taklit R2'yi kullanır.
 - `arsiv\c1\<albüm>.kmp` — albüm kapları (parçalar bellekte şifrelenip eklenir)
 - `kapak\<albüm>.jpg` — albüm kapakları
 - `anons\<anons>.mp3`, `anonslar.json`, `anons-torba.json` (karışık planların sırası), `anons-gonderilecek.json` (internet gelince gidecek çalma kayıtları)
+- `guncelleme\` — inmiş, kurulmayı bekleyen yeni sürüm (`bekleyen.json` + kurulum dosyası)
 - `durum.json` — saat farkı, son başarılı bağlantı, hizmet son günü (7 gün kuralı)
 - `gecmis.json` — çalma geçmişi (7 gün) · `kayit-kuyrugu.json` — yayın kaydı kuyruğu (15 dk'da bir gider)
 - `deneme-arsiv\` — Faz 0 dayanıklılık deneyinin yazdığı sahte arşiv (her deneyde silinip baştan yazılır)

@@ -109,6 +109,29 @@ public sealed class Library : IDisposable
     public void Dispose() => Stop();
 
     /// <summary>Paketi hemen yeniden sor (akış değişti, oturum açıldı vb.).</summary>
+    /// <summary>
+    /// "Akışı düzenle"ye basıldı: şube web sitesinde akışı değiştirecek. Saatlik sorguyu beklemeden 2, 5, 10 ve 20 dk
+    /// sonra paket yeniden sorulur; yeni tarz hemen inmeye başlar (eski tarzlar yenisi inene kadar çalar).
+    /// </summary>
+    public void RefreshAfterFlowEdit()
+    {
+        foreach (var min in new[] { 2, 5, 10, 20 })
+            System.Threading.Tasks.Task.Delay(TimeSpan.FromMinutes(min)).ContinueWith(_ => { if (!_stop) RefreshSoon(); });
+    }
+
+    /// <summary>"Aylık yeni müzik" anahtarı (karar 10 Eki 2026). Açılınca 30 gün dolmuşsa sunucu hemen yeniler.</summary>
+    public void SetUpdates(bool on)
+    {
+        lock (_gate)
+        {
+            if (_device.Updates == on) return;
+            _device.Updates = on;
+        }
+        WriteJson(DeviceFile, _device);
+        Log.Info("Aylık yeni müzik: " + (on ? "açık" : "kapalı"));
+        RefreshSoon();
+    }
+
     public void RefreshSoon()
     {
         _lastManifestMs = long.MinValue / 2;
@@ -156,6 +179,10 @@ public sealed class Library : IDisposable
                 ["done"] = _done,
                 ["checkedAt"] = _checkedAt?.ToString("HH:mm"),
                 ["speedKbps"] = SpeedKbps,
+                ["updates"] = _device.Updates,
+                // Sıradaki aylık değişim (son değişim + 30 gün); sunucu karar verir, bu sadece bilgi.
+                ["nextUpdate"] = _device.Updates && _device.LastUpdateAt is long last
+                    ? Clock.Istanbul(last + 30L * 86_400_000).ToString("dd.MM.yyyy") : null,
             };
         }
     }

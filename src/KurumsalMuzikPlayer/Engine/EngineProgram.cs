@@ -22,6 +22,8 @@ static class EngineProgram
             SendHello("show");
             return 0;
         }
+        // İnmiş güncelleme varsa müzik başlamadan kurulur; kurulum bitince program kendiliğinden açılır.
+        if (!args.Has("--guncelleme-yok") && Updater.TryInstallPending()) return 0;
         AppDomain.CurrentDomain.UnhandledException += (_, e) => Log.Error("Motor çöktü", e.ExceptionObject as Exception);
         Application.ThreadException += (_, e) => Log.Error("Motor ana iş parçacığı hatası", e.Exception);
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);

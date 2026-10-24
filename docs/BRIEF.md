@@ -146,8 +146,9 @@ Akış ve anons kuralları web'den **birebir** C#'a çevrilir ve web'in testleri
    cihaz "Offline · KMP 1.0.3" diye görünür.
 2. ~~**Worker "şifreli ver" kipi** (§5) ve manifestte paket anahtarı.~~ Yapıldı ve canlıya gitti (23 Eki), 24 Eki'de bırakıldı
    (şifreleme player'da); `/e/` ve `media.archive` sonraki web yayınında kaldırılır.
-3. **Güncelleme dosyası:** `kurumsalmuzik.net/indir/kmp/` altında sürüm bilgisi (`latest.json`: sürüm, adres, SHA-256) ve
-   kurulum dosyası. İndirme adresi `/indir/Kurumsal-Muzik-Player-Kurulum.exe` 1.0 yayına girince 1.0'ı gösterir (o güne kadar 2.0.17).
+3. **Güncelleme dosyası:** `kurumsalmuzik.net/indir/kmp/` altında sürüm bilgisi (`latest.json`: sürüm, yapı numarası,
+   dosya adı, SHA-256, boyut) ve kurulum dosyası; `scripts/yayinla.sh` yükler (sunucuda `/var/www/indir/kmp`, nginx'te
+   `/indir/` zaten açık — web projesinde değişiklik gerekmez). İndirme adresi `/indir/Kurumsal-Muzik-Player-Kurulum.exe` 1.0 yayına girince 1.0'ı gösterir (o güne kadar 2.0.17).
 
 ## 8. Fazlar
 
@@ -183,5 +184,5 @@ açıkken 2 saat çalışır.
 - [ ] Faz 1 — Giriş ve cihaz (yapıldı, 23 Eki 2026: kurulum dosyası, giriş ekranı, cihaz kaydı DPAPI ile, 15 dk'da bir durum sorgusu, düşme, süre dolması, Windows'la başlama; yerel sunucuyla uçtan uca ve kur/güncelle/kaldır denendi. Onur'un Windows 7 ve 11 kanıtı bekliyor)
 - [ ] Faz 2 — İndirme ve arşiv (program tarafı yapıldı ve yerel sunucu + yerel Worker ile denendi, 23 Eki 2026: şifreli indirme, albüm kapları, yarıda kesilip devam, arşivden çalma. 24 Eki 2026: şifreleme player'a taşındı (1.0.0-faz2.2), canlı sunucuyla Onur'un bilgisayarında indiriyor ve arşivden çalıyor; kanıt senaryosu bekliyor)
 - [ ] Faz 3 — Çalma, anonslar, internetsiz 7 gün (yapıldı, 24 Eki 2026, 1.0.0-faz3: saat dilimine göre tarz, inmemiş tarz yerine inmiş olan, anons kuşağı ikinci mpv'de ve müzik kaldığı saniyeden sürer, anons kuralları web'le birebir ve aynı testlerle, 7 gün kuralı, geçmiş, yayın kaydı; pencerede kapak, gün bandı, Geçmiş ve Anonslar sekmeleri. Canlıda Onur'un bilgisayarında çalışıyor; kanıt senaryosu bekliyor)
-- [ ] Faz 4 — Akış değişimi, paket döngüsü, güncelleme
+- [ ] Faz 4 — Akış değişimi, paket döngüsü, güncelleme (program tarafı yapıldı, 24 Eki 2026, 1.0.0-faz4.1: "Akışı düzenle" web'i açar ve paketi 2/5/10/20 dk sonra erken sorar; "Aylık yeni müzik" anahtarı; eski tarzlar yenisi inene kadar çalar, pakette olmayan albümler paket tamamen inince silinir; kendini güncelleme yerel adresle denendi: arkada iner, SHA-256 doğrulanır, yeniden açılışta ~10 sn'de kurulur ve program kendiliğinden açılır. İlk canlı yayın `scripts/yayinla.sh` ile `/indir/kmp/`'ye — Onur onayı bekliyor; kanıt senaryosu bekliyor)
 - [ ] Faz 5 — Mağazada deneme ve dağıtım

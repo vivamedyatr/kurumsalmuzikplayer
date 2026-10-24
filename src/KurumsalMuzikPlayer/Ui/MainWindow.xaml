@@ -172,8 +172,18 @@
                 </StackPanel>
             </DockPanel>
 
-            <!-- Durum -->
+            <!-- Durum; sağda akış düzenleme ve aylık yeni müzik -->
             <StackPanel Grid.Row="3" Margin="0,10,0,0">
+                <DockPanel Margin="0,0,0,4">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                        <CheckBox x:Name="UpdatesBox" Content="Aylık yeni müzik" Foreground="{StaticResource Muted}" FontSize="12"
+                                  VerticalAlignment="Center" Margin="0,0,14,0" Click="Updates_Click"
+                                  ToolTip="Açıkken akıştaki albümlerin bir kısmı ayda bir yenilenir (en fazla 5 albüm)." />
+                        <Button Content="Akışı düzenle" Style="{StaticResource FlatButton}" Padding="12,4" FontSize="12" Click="FlowEdit_Click"
+                                ToolTip="Kurumsal Müzik Net'te bu şubenin tarz akışını açar (akış şifresi istenir)." />
+                    </StackPanel>
+                    <TextBlock x:Name="UpdatesText" FontSize="12" Foreground="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                </DockPanel>
                 <TextBlock x:Name="NoticeText" FontSize="12" Foreground="{StaticResource Warn}" TextWrapping="Wrap" Margin="0,0,0,3" Visibility="Collapsed" />
                 <TextBlock x:Name="StatusText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
                 <TextBlock x:Name="LibraryText" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="Collapsed" />

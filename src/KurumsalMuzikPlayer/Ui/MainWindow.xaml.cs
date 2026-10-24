@@ -124,6 +124,7 @@ public partial class MainWindow : Window
         if (screen != "player") return;
 
         ApplyNowPlaying(s);
+        _updateReady = (string?)s["updateReady"];
         ApplyLibrary(s["library"] as JObject);
         var days = (int?)s["offlineDaysLeft"] ?? 0;
         var status = (string?)s["status"] ?? "";
@@ -214,6 +215,11 @@ public partial class MainWindow : Window
             _ => $"Arşiv %{percent} · {message}",
         };
         LibraryText.Foreground = (string?)lib["state"] is "offline" or "disk-full" ? (Brush)FindResource("Warn") : (Brush)FindResource("Muted");
+        var updates = (bool?)lib["updates"] ?? true;
+        if (DateTime.Now - _lastUpdatesClick > TimeSpan.FromSeconds(3)) UpdatesBox.IsChecked = updates;
+        var next = (string?)lib["nextUpdate"];
+        UpdatesText.Text = updates ? (next != null ? $"Sıradaki yeni müzik: {next}" : "") : "Albüm listesi sabit (aylık yeni müzik kapalı)";
+        if (_updateReady != null) UpdatesText.Text = $"Yeni sürüm hazır ({_updateReady}); program yeniden açılınca kurulur";
     }
 
     // ---------- gün bandı ----------
@@ -432,6 +438,23 @@ public partial class MainWindow : Window
     }
 
     void Next_Click(object sender, RoutedEventArgs e) => _link.Send(new JObject { ["t"] = "next" });
+
+    DateTime _lastUpdatesClick = DateTime.MinValue;
+    string? _updateReady;
+
+    void Updates_Click(object sender, RoutedEventArgs e)
+    {
+        _lastUpdatesClick = DateTime.Now;
+        _link.Send(new JObject { ["t"] = "updates", ["on"] = UpdatesBox.IsChecked == true });
+    }
+
+    /// <summary>Akış programda düzenlenmez (karar 9 Eki 2026): web sitesinde açılır; program paketi erken yeniden sorar.</summary>
+    void FlowEdit_Click(object sender, RoutedEventArgs e)
+    {
+        try { Process.Start(ServerApi.BaseUrl + "/giris")?.Dispose(); }
+        catch (Exception ex) { Log.Warn($"Tarayıcı açılamadı: {ex.Message}"); }
+        _link.Send(new JObject { ["t"] = "flow-edit" });
+    }
 
     void Link_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {

@@ -58,6 +58,8 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{#AppName} programını başlat"; Flags: nowait postinstall skipifsilent
+; Program kendini güncellerken (sessiz kurulum, /guncelleme=1) kurulum bitince program yeniden açılır.
+Filename: "{app}\{#AppExe}"; Parameters: "--gizli"; Flags: nowait; Check: IsUpdate
 
 [UninstallRun]
 Filename: "{app}\{#AppExe}"; Parameters: "--kapat"; Flags: runhidden waituntilterminated; RunOnceId: "Kapat"
@@ -85,6 +87,11 @@ begin
       ShellExec('open', 'https://dotnet.microsoft.com/download/dotnet-framework/net48', '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
     Result := False;
   end;
+end;
+
+function IsUpdate(): Boolean;
+begin
+  Result := ExpandConstant('{param:guncelleme|0}') = '1';
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
