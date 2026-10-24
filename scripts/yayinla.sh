@@ -2,8 +2,9 @@
 # Yeni sürümü yayınlar (BRIEF §7.3): kurulu 1.0 programları en geç 4 saatte görür, arkada indirir, yeniden açılışta kurar.
 #   1) Directory.Build.props: InformationalVersion (görünen sürüm) ve FileVersion'ın son parçası (yapı) artırılır
 #   2) powershell -ExecutionPolicy Bypass -File scripts/kurulum.ps1     3) bash scripts/yayinla.sh
-# Dosyalar kurumsalmuzik.net/indir/kmp/'ye gider (sunucuda /var/www/indir/kmp). 2.x'in /indir/latest.yml'ine ve
-# /indir/Kurumsal-Muzik-Player-Kurulum.exe'ye DOKUNULMAZ (o adres Faz 5'te, Onur'un kararıyla 1.0'a çevrilir).
+# Dosyalar kurumsalmuzik.net/indir/kmp/'ye gider (sunucuda /var/www/indir/kmp). Sitedeki ve e-postalardaki sabit indirme
+# adresi /indir/Kurumsal-Muzik-Player-Kurulum.exe de son 1.0 sürümüne çevrilir (karar Onur, 25 Eki 2026).
+# 2.x'in /indir/latest.yml'ine ve eski adlı VM-Radio-Player-2.0-Kurulum.exe'ye DOKUNULMAZ.
 # Aynı yapı ikinci kez yüklenmez. Önce kurulum dosyası, en son latest.json: programlar dosya yerine oturmadan görmez.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -30,9 +31,11 @@ echo "== $V (yapı $BUILD) yükleniyor"
 TMP=/tmp/kmp-$BUILD
 ssh -i $KEY $HOST "rm -rf $TMP && mkdir -p $TMP"
 scp -i $KEY "dist/$EXE" dist/latest.json $HOST:$TMP/
-ssh -i $KEY $HOST "set -e; sudo mkdir -p $DIR; cd $DIR; sudo install -m 644 '$TMP/$EXE' .; sudo install -m 644 $TMP/latest.json latest.json.yeni; sudo mv latest.json.yeni latest.json; rm -rf $TMP"
+ssh -i $KEY $HOST "set -e; sudo mkdir -p $DIR; cd $DIR; sudo install -m 644 '$TMP/$EXE' .; sudo install -m 644 $TMP/latest.json latest.json.yeni; sudo mv latest.json.yeni latest.json; sudo cp '$EXE' ../Kurumsal-Muzik-Player-Kurulum.exe.yeni; sudo mv ../Kurumsal-Muzik-Player-Kurulum.exe.yeni ../Kurumsal-Muzik-Player-Kurulum.exe; rm -rf $TMP"
 
 echo "== kontrol"
 curl -fsS "https://kurumsalmuzik.net/indir/kmp/latest.json?t=$(date +%s)"
+echo
+echo "sabit adres: $(curl -sI https://kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe | grep -i content-length | tr -d '')"
 echo
 echo "== yayında: $V (kurulu 1.0 programları en geç 4 saat içinde indirir, yeniden açılışta kurar)"

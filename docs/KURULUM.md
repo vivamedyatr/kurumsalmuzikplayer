@@ -23,7 +23,8 @@ Sessiz kurulum: `/VERYSILENT /SUPPRESSMSGBOXES`. Kurulum ve kaldırma çalışan
 ## Yeni sürüm yayınlamak (kendini güncelleme)
 1. `Directory.Build.props`: `InformationalVersion` (görünen sürüm) ve `FileVersion`'ın son parçası (yapı; her yayında artar).
 2. `powershell -ExecutionPolicy Bypass -File scripts\kurulum.ps1`
-3. `bash scripts/yayinla.sh` (Onur onayıyla) → `kurumsalmuzik.net/indir/kmp/latest.json` + kurulum dosyası.
+3. `bash scripts/yayinla.sh` (Onur onayıyla) → `kurumsalmuzik.net/indir/kmp/latest.json` + kurulum dosyası; sitedeki sabit
+   adres `/indir/Kurumsal-Muzik-Player-Kurulum.exe` de son sürüme çevrilir.
 Kurulu programlar 4 saatte bir bakar, arkada indirir, SHA-256'yı doğrular, **yeniden açılışta** (müzik başlamadan) sessiz
 kurar ve kendiliğinden açılır. 3 başarısız denemeden sonra o sürüm atlanır. 2.x'in `/indir/latest.yml`'ine dokunulmaz.
 Yerel deneme: `$env:KMP_GUNCELLEME_URL = "http://127.0.0.1:8765/kmp/latest.json"` ve o klasörü sunan bir HTTP sunucusu.

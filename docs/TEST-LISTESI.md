@@ -59,8 +59,10 @@ Aşağıdaki liste bu testler için bir rehberdir.
 ## 6. Dağıtım (her biri Onur'un kararı)
 
 1. **Sürüm adı:** **1.0.0** (yapı 100; 25 Eki 2026). Düzeltmeler 1.0.1, 1.0.2… (yapı numarası her yayında artar).
-2. **Sabit indirme adresi:** `kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe` bugün 2.0.17'yi veriyor;
-   1.0'a çevrilir (müşteri e-postaları ve sitedeki bağlantılar bu adresi kullanıyor). 2.x'in güncelleme dosyası
+2. **Sabit indirme adresi:** ~~bugün 2.0.17'yi veriyor~~ → `kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe`
+   **1.0.0'ı veriyor** (karar Onur, 25 Eki 2026; müşteri e-postaları ve sitedeki bağlantılar bu adresi kullanıyor; her yeni
+   1.0.x yayınında `scripts/yayinla.sh` bunu da günceller). Eski adlı `VM-Radio-Player-2.0-Kurulum.exe` 2.0.17'de kaldı;
+   2.0.17'nin kendi dosyası (`…-2.0.17.exe`) sunucuda duruyor (geri dönüş gerekirse). 2.x'in güncelleme dosyası
    (`/indir/latest.yml`) ayrıca bir karar: 2.0.17'ler olduğu gibi kalır ya da son bir 2.x sürümüyle 1.0'a yönlendirilir.
 3. **2.x şubelerin geçişi (karar: elle kurulum):** 1.0 kurulur → aynı şube adıyla giriş (2.x'in cihazını devralır) →
    arşiv bir kez yeniden iner (2–3 saat; o sırada inen şarkılar çalar) → 2.x kaldırılır.
