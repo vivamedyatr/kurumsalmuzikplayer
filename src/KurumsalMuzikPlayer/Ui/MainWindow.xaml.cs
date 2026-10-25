@@ -215,7 +215,7 @@ public partial class MainWindow : Window
         }
         else if (paused)
         {
-            NextText.Text = "Duraklatıldı. ▶ ile devam edince şarkı kaldığı saniyeden sürer.";
+            NextText.Text = "Duraklatıldı. Devam ettiğinizde şarkı kaldığı saniyeden sürer.";
             NextText.Foreground = (Brush)FindResource("Warn");
         }
         else if (status != "Çalıyor")
@@ -481,12 +481,15 @@ public partial class MainWindow : Window
         foreach (var g in ((s["archive"] as JObject)?["genres"] as JArray)?.OfType<JObject>() ?? Enumerable.Empty<JObject>())
             genres[(string?)g["name"] ?? ""] = g;
         var minute = (int?)s["minute"] ?? 0;
+        // Gece yarısından ilk dilime kadar son dilim sürer: o saatlerde son dilim çalıyor, diğerleri sırada.
+        var night = slots.Count > 0 && minute < ((int?)slots[0]["hour"] ?? 0) * 60;
         for (var i = 0; i < slots.Count; i++)
         {
             var from = (int?)slots[i]["hour"] ?? 0;
             var to = i + 1 < slots.Count ? (int?)slots[i + 1]["hour"] ?? 24 : 24;
             var name = (string?)slots[i]["name"] ?? "";
-            var state = minute >= to * 60 ? "ÇALDI" : minute >= from * 60 ? "ÇALIYOR" : "SIRADA";
+            var state = night ? (i == slots.Count - 1 ? "ÇALIYOR" : "SIRADA")
+                : minute >= to * 60 ? "ÇALDI" : minute >= from * 60 ? "ÇALIYOR" : "SIRADA";
             var row = new Grid { Margin = new Thickness(0, 0, 0, 10), Opacity = state == "ÇALDI" ? 0.55 : 1 };
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(58) });
