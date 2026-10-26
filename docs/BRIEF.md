@@ -46,6 +46,15 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 | 8 | Destek | Web'de **`kurumsalmuzik.net/destek`** (WhatsApp +90 212 807 05 87, info@vivamedya.com). Programda sol rayda, giriş ekranında ve "Yayın durdu" ekranında "Destek ↗". |
 | 9 | Ad | "Bugünkü akış" → **"Yayın akışı"** (her gün aynı akış çalar; "bugünkü" yarın başka akış varmış gibi anlaşılıyordu). |
 
+### 2.1b 1.0.2 (karar Onur, 26 Eki 2026)
+
+| # | Konu | Karar |
+|---|---|---|
+| 10 | Logo | Sol üstte, giriş ve "Yayın durdu" ekranlarında resmî logo: **KURUMSAL / MÜZİK NET** ("NET" kırmızı; web `.s-logo`), altında "BY VİVA MEDYA"; **VİVA MEDYA** vivamedya.com'u açar. |
+| 11 | Pencere tepsideyken | Pencere kapatılınca süreç kapanmaz, **gizlenir**; tepsiden/kısayoldan açınca beklemeden gelir (ölçüm: 0,1 sn). Windows açılışında pencere çizilmeden arka planda hazır bekler. Gizliyken ekran güncellenmez, açılınca son durum çizilir. Bellek (özel): motor ~60 MB, pencere ~55 MB, iki mpv ~65 MB. |
+| 12 | Bozuk şarkı | Yeniden indirilmez (karar Onur): şarkı 30 sn ilerlemezse bekçi sonrakine geçer. |
+| 13 | Ses çıkışı yok | Hoparlör/ses aygıtı yoksa (çıkarıldı, kapalı uzak masaüstü oturumu) mpv her şarkıyı anında bitiriyordu: 1.0.0–1.0.1'de günlüğe dakikada ~800 satır ve panele sahte "çaldı" kaydı (26 Eki'de Onur'un bilgisayarında görüldü). 1.0.2: art arda 3 hatada çalma durur, ekranda "SES ÇIKIŞI YOK", 30 sn'de bir yeniden denenir; "çaldı" kaydı ancak şarkı 1,5 sn çaldıktan sonra yazılır. |
+
 ### 2.2 Eski BRIEF'ten aynen geçen kararlar (özet; ayrıntı orada)
 
 - **Platform:** Windows 7 SP1, 8, 8.1, 10, 11 — 64 bit. Tek program, tek kurulum dosyası, kullanıcı bazlı kurulum (yönetici izni istemez).
@@ -232,6 +241,8 @@ Kanıt senaryoları mağaza denemesi yerine Onur'un kendi testlerinde (karar 25 
 - [x] Faz 5 — Final sürüm 1.0.0 (25 Eki 2026, yapı 100, `/indir/kmp/`'de; sitedeki sabit indirme adresi de 1.0.0'ı veriyor; GitHub etiketi `v1.0.0`). Mağazada deneme yok (karar Onur); testler Onur'da, `docs/TEST-LISTESI.md`. Açık kararlar ve sonraki sürüm adayları §9'da.
 
 - [x] **1.0.1** (25 Eki 2026, yapı 101; Onur'un ilk istekleri): hesaptan çıkış, duraklat/devam, Destek bağlantısı, "Yayın akışı" adı (§2.1a). Derlendi, 21 test geçti; Onur'un bilgisayarına kuruldu, duraklat/devam (aynı saniyeden sürdü), çıkış onayı (Vazgeç) ve Yayın akışı denendi; gerçek çıkış Onur'da. Web `/destek` canlıda (49aa1d8), **1.0.1 yayında** (`/indir/kmp/`, sabit adres de 1.0.1; GitHub etiketi `v1.0.1`). Ayrıca: gece yarısından sonra Yayın akışı sayfasında son dilim "ÇALIYOR" görünür.
+
+- [x] **1.0.2** (26 Eki 2026, yapı 102; §2.1b): resmî logo + Viva Medya bağlantısı, pencere gizlenir (süreç kapanmaz), ilerlemeyen şarkıyı atlayan bekçi, ses çıkışı yokken hata fırtınasının önlenmesi. Onur'un bilgisayarında denendi (gizle/aç 0,1 sn; olmayan ses aygıtıyla `KMP_SES_AYGITI` denemesi: 30 sn'de bir tek satır, sahte kayıt yok). Yayın Onur onayıyla.
 
 **Belgeler (25 Eki 2026'da güncellendi):** bu BRIEF; derleme ve deneme `docs/KURULUM.md`; test rehberi
 `docs/TEST-LISTESI.md`; sunucu, yayın ve mağaza kurulumu dahil her şey `../kurumsalmuzik/docs/KURULUM-KILAVUZU.html` §12

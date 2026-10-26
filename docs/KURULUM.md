@@ -41,6 +41,7 @@ $env:KMP_SERVER = "http://localhost:3000"   # sunucu
 $env:KMP_DATA_DIR = "<boş bir klasör>"      # ayrı veri klasörü
 $env:KMP_DURUM_SN = "10"                    # durum sorgusu 15 dk yerine 10 sn (düşmeyi beklemeden görmek için)
 $env:KMP_HIZ_KBPS = "2000"                  # indirme hız sınırı (varsayılan 6000 = 6 Mbps)
+$env:KMP_SES_AYGITI = "wasapi/yok"         # olmayan ses aygıtı: "ses çıkışı yok" durumunu denemek için
 ```
 Yerel deneme hesabının bilgileri `deneme.env`'de (git'e girmez; sadece yerel veritabanında geçerli).
 Arşiv denemesi için yerel Worker (`npm run dev:media -- --yerel`) ve deneme müziği (`npm run media:test -- <tarz> --album "Ad"`)
@@ -57,7 +58,7 @@ gerekir; ikisi de sadece bilgisayardaki taklit R2'yi kullanır.
 ## Programın klasörleri
 `%LOCALAPPDATA%\Kurumsal Muzik Player\` (`KMP_DATA_DIR` ortam değişkeniyle değiştirilebilir):
 - `gunluk\motor-yyyy-MM-dd.txt`, `gunluk\pencere-yyyy-MM-dd.txt` — 7 gün tutulur
-- `ayarlar.json` — ses düzeyi · `pencere.json` — pencerenin yeri ve ölçeği
+- `ayarlar.json` — ses düzeyi · `pencere.json` — pencerenin yeri ve ölçeği (pencere kapatılınca gizlenir, süreç kapanmaz)
 - `cihaz.bin` — şube kaydı ve sunucu anahtarı (DPAPI ile şifreli; başka kullanıcı/bilgisayarda açılmaz)
 - `paket.json` — son offline paket (akış dilimleri, albümler, şarkılar)
 - `cihaz-paket.json` — bu bilgisayarın albüm listesi ve "Aylık yeni müzik" anahtarı

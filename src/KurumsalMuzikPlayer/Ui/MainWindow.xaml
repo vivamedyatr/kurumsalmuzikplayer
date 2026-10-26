@@ -34,8 +34,14 @@
                 <Border Grid.Column="0" Background="{StaticResource Rail}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
                     <DockPanel Margin="20,20,14,14">
                         <StackPanel DockPanel.Dock="Top">
-                            <TextBlock FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="Black" FontSize="21">KURUMSAL<Run Text="." Foreground="{StaticResource Vm}" /></TextBlock>
-                            <TextBlock x:Name="WordmarkSub" Style="{StaticResource MonoText}" FontSize="9" Margin="1,6,0,22" />
+                            <TextBlock FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="Black" FontSize="19" LineHeight="18"
+                                       LineStackingStrategy="BlockLineHeight">KURUMSAL<LineBreak />MÜZİK <Run Text="NET" Foreground="{StaticResource Vm}" /></TextBlock>
+                            <StackPanel Orientation="Horizontal" Margin="1,4,0,16">
+                                <TextBlock x:Name="RailBy" Style="{StaticResource MonoText}" FontSize="9" VerticalAlignment="Center" />
+                                <Button Style="{StaticResource LinkButton}" Click="Viva_Click" ToolTip="vivamedya.com" VerticalAlignment="Center">
+                                    <TextBlock x:Name="RailViva" FontFamily="{StaticResource Mono}" FontSize="9" />
+                                </Button>
+                            </StackPanel>
                         </StackPanel>
 
                         <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="0,14,0,0">
@@ -321,8 +327,14 @@
                     </Rectangle>
                     <Rectangle x:Name="LoginGrain" Opacity="0.35" />
                     <StackPanel VerticalAlignment="Center" Margin="56,0,40,0">
-                        <TextBlock FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="Black" FontSize="40">KURUMSAL<Run Text="." Foreground="{StaticResource Vm}" /></TextBlock>
-                        <TextBlock x:Name="LoginSub" Style="{StaticResource MonoText}" FontSize="11" Margin="2,8,0,0" />
+                        <TextBlock FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="Black" FontSize="38" LineHeight="36"
+                                       LineStackingStrategy="BlockLineHeight">KURUMSAL<LineBreak />MÜZİK <Run Text="NET" Foreground="{StaticResource Vm}" /></TextBlock>
+                            <StackPanel Orientation="Horizontal" Margin="2,6,0,0">
+                                <TextBlock x:Name="LoginBy" Style="{StaticResource MonoText}" FontSize="11" VerticalAlignment="Center" />
+                                <Button Style="{StaticResource LinkButton}" Click="Viva_Click" ToolTip="vivamedya.com" VerticalAlignment="Center">
+                                    <TextBlock x:Name="LoginViva" FontFamily="{StaticResource Mono}" FontSize="11" />
+                                </Button>
+                            </StackPanel>
                         <TextBlock Text="Mağazanızın radyosu internet olmasa da çalar." FontSize="20" FontWeight="SemiBold" Margin="0,40,0,0" TextWrapping="Wrap" />
                         <TextBlock Text="Kurumsal Müzik Net kullanıcı adınız, şifreniz ve bu mağazanın şube adıyla bir kez giriş yapın; gerisini program yapar."
                                    FontSize="13.5" Foreground="{StaticResource Fg2}" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="20" />
@@ -357,7 +369,14 @@
             <!-- ===================== YAYIN DURDU (hizmet süresi) ===================== -->
             <Grid x:Name="ExpiredScreen" Visibility="Collapsed">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="520">
-                    <TextBlock FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="Black" FontSize="24">KURUMSAL<Run Text="." Foreground="{StaticResource Vm}" /></TextBlock>
+                    <TextBlock FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="Black" FontSize="24" LineHeight="23"
+                                       LineStackingStrategy="BlockLineHeight">KURUMSAL<LineBreak />MÜZİK <Run Text="NET" Foreground="{StaticResource Vm}" /></TextBlock>
+                            <StackPanel Orientation="Horizontal" Margin="1,5,0,0">
+                                <TextBlock x:Name="ExpiredBy" Style="{StaticResource MonoText}" FontSize="10" VerticalAlignment="Center" />
+                                <Button Style="{StaticResource LinkButton}" Click="Viva_Click" ToolTip="vivamedya.com" VerticalAlignment="Center">
+                                    <TextBlock x:Name="ExpiredViva" FontFamily="{StaticResource Mono}" FontSize="10" />
+                                </Button>
+                            </StackPanel>
                     <TextBlock Text="Yayın durdu" FontFamily="{StaticResource Wide}" FontStretch="Expanded" FontWeight="Black" FontSize="40" Margin="0,30,0,0" />
                     <TextBlock x:Name="ExpiredText" FontSize="15" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" Margin="0,12,0,0" LineHeight="22" />
                     <Button Content="Destek  ↗" Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Margin="0,24,0,0" Padding="16,9" Click="Support_Click"

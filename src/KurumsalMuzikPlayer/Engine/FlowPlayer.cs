@@ -19,6 +19,8 @@ namespace KurumsalMuzikPlayer.Engine;
 /// - Duraklat (1.0.1, karar Onur 25 Eki 2026): müzik aynı şarkının aynı saniyesinde bekler, devam edince oradan sürer.
 ///   Duraklatılmışken anons çalmaz (o dakikalar atlanır), yayın kaydına "durdu" yazılır. Program yeniden açılınca çalar.
 /// - 7 gün internetsiz ya da hizmet süresi bitti: müzik durur (Clock.PlayGate).
+/// - Ses çıkışı yoksa (hoparlör/ses aygıtı çıkarıldı, oturum kapalı) mpv her şarkıyı anında bitirir: art arda 3 hatada
+///   çalma durur, 30 sn'de bir yeniden denenir (1.0.2). "Çaldı" kaydı ancak şarkı 1,5 sn çaldıktan sonra yazılır.
 /// </summary>
 sealed class FlowPlayer
 {
@@ -26,6 +28,9 @@ sealed class FlowPlayer
     const int MinReady = 3;
     const int SkipCooldownMs = 10_000;
     const int BreakGapMs = 400;
+    const int ErrorStreakLimit = 3;
+    const int RetryAfterErrorsMs = 30_000;
+    const int PlayedAfterMs = 1500;
 
     sealed class Decision
     {
@@ -57,6 +62,9 @@ sealed class FlowPlayer
     volatile bool _running;
     volatile bool _paused;
     int _restarts;
+    int _errorStreak;
+    long _retryAtMs;
+    volatile string? _audioIssue;
 
     public Announcer? Announcer { get; set; }
     public int Restarts => _restarts;
@@ -116,7 +124,10 @@ sealed class FlowPlayer
             var name = music ? "muzik" : "anons";
             // Anons motorunda boşluksuz geçiş kapalı: açıkken "dosya bitti" olayı ~2 sn erken geliyor, müzik anonsun
             // son saniyelerinin üstüne giriyordu (2.x'te ölçüldü, 15 Eki 2026).
-            var args = new[] { "--audio-buffer=2", $"--volume={_volume}", music ? "--gapless-audio=weak" : "--gapless-audio=no" };
+            var args = new List<string> { "--audio-buffer=2", $"--volume={_volume}", music ? "--gapless-audio=weak" : "--gapless-audio=no" };
+            // KMP_SES_AYGITI: sadece deneme için (örn. olmayan bir aygıtla "ses çıkışı yok" durumunu görmek).
+            var device = Environment.GetEnvironmentVariable("KMP_SES_AYGITI");
+            if (!string.IsNullOrEmpty(device)) args.Add("--audio-device=" + device);
             var mpv = new MpvClient(_mpvExe, name);
             mpv.Crashed += () => OnCrashed(music);
             if (music)
@@ -128,6 +139,7 @@ sealed class FlowPlayer
                 mpv.Event += (ev, msg) =>
                 {
                     if (ev == "idle") _ = OnIdle();
+                    else if (ev == "end-file" && (string?)msg["reason"] == "error") OnPlayError((string?)msg["file_error"]);
                 };
             }
             mpv.Start(args);
@@ -219,8 +231,8 @@ sealed class FlowPlayer
                 StopMusic();
                 return;
             }
-            // Duraklatılmışken dilim değişse de bekler; devam edilince yeni tarza geçilir.
-            if (d.Key != _loadedKey && _breakTitle == null && !_paused) Load(d, false);
+            // Duraklatılmışken dilim değişse de bekler; devam edilince yeni tarza geçilir. Ses çıkışı hatasından sonra 30 sn bekler.
+            if (d.Key != _loadedKey && _breakTitle == null && !_paused && NowMs() >= _retryAtMs) Load(d, false);
         }
         catch (Exception e)
         {
@@ -257,7 +269,7 @@ sealed class FlowPlayer
             else mpv.Command("loadfile", media.TrackUrl(list[0]), "replace");
             foreach (var t in list.Skip(1)) mpv.Command("loadfile", media.TrackUrl(t), "append");
             mpv.Set("pause", _paused);
-            Log.Info($"Çalınıyor: {d.GenreName}, {list.Count} şarkı{(d.WaitingFor != null ? $" ({d.WaitingFor} iniyor)" : "")}");
+            if (_audioIssue == null) Log.Info($"Çalınıyor: {d.GenreName}, {list.Count} şarkı{(d.WaitingFor != null ? $" ({d.WaitingFor} iniyor)" : "")}");
         }
         catch (Exception e)
         {
@@ -275,21 +287,55 @@ sealed class FlowPlayer
         Manifest.Track? t;
         lock (_gate) t = pos >= 0 && pos < _list.Count ? _list[pos] : null;
         if (t == null) return;
+        // Hatalar yüzünden çalma durdurulduysa mpv'den geç gelen şarkı geçişi sayılmaz (30 sn sonra yeniden denenir).
+        if (NowMs() < _retryAtMs)
+        {
+            _current = null;
+            return;
+        }
         _current = t;
         _pos = 0;
         var genre = _decision?.GenreName ?? "";
-        var album = _library()?.Current?.Albums.FirstOrDefault(a => a.Id == t.Album)?.Title ?? "";
-        Log.Info($"Çalıyor: {t.Title} · {album}");
-        History.Add("music", t.Title, $"{album} · {genre}", t.Album);
-        PlayLog.State(!_paused);
-        PlayLog.Song(t.Title, album, genre);
-        if (Announcer != null) Announcer.Ready = !_paused;
+        // Açılamayan şarkı (ses çıkışı yok) milisaniyeler içinde biter: kayıt ancak gerçekten çalmaya devam ediyorsa yazılır.
+        Task.Delay(PlayedAfterMs).ContinueWith(_ =>
+        {
+            if (!ReferenceEquals(_current, t) || !_running || NowMs() < _retryAtMs) return;
+            _errorStreak = 0;
+            if (_audioIssue != null)
+            {
+                _audioIssue = null;
+                Log.Info("Ses çıkışı yeniden çalışıyor");
+            }
+            var album = _library()?.Current?.Albums.FirstOrDefault(a => a.Id == t.Album)?.Title ?? "";
+            Log.Info($"Çalıyor: {t.Title} · {album}");
+            History.Add("music", t.Title, $"{album} · {genre}", t.Album);
+            PlayLog.State(!_paused);
+            PlayLog.Song(t.Title, album, genre);
+            if (Announcer != null) Announcer.Ready = !_paused && _breakTitle == null;
+        });
+    }
+
+    /// <summary>Şarkı açılamadı. Art arda birkaç kez olursa (çoğunlukla ses çıkışı yok) çalma durur, 30 sn sonra yeniden denenir.</summary>
+    void OnPlayError(string? error)
+    {
+        if (!_running) return;
+        var streak = Interlocked.Increment(ref _errorStreak);
+        if (streak == 1) Log.Warn($"Şarkı çalınamadı: {error ?? "bilinmeyen hata"}");
+        if (streak < ErrorStreakLimit) return;
+        _errorStreak = 0;
+        _retryAtMs = NowMs() + RetryAfterErrorsMs;
+        var issue = error != null && error.IndexOf("audio output", StringComparison.OrdinalIgnoreCase) >= 0
+            ? "Ses çıkışı açılamadı: hoparlör ya da ses aygıtı bulunamadı. 30 sn'de bir yeniden deneniyor."
+            : "Şarkılar çalınamıyor; 30 sn'de bir yeniden deneniyor.";
+        if (_audioIssue == null) Log.Warn($"Art arda {ErrorStreakLimit} şarkı çalınamadı ({error}); çalma durdu, 30 sn'de bir yeniden denenecek");
+        _audioIssue = issue;
+        StopMusic();
     }
 
     /// <summary>Liste bitti: yeniden yükle (bu arada inen şarkılar da girer), baştan çal.</summary>
     async Task OnIdle()
     {
-        if (_breakTitle != null || _reloading == 1 || _decision?.Genre == null || _paused) return;
+        if (_breakTitle != null || _reloading == 1 || _decision?.Genre == null || _paused || NowMs() < _retryAtMs || _loadedKey == "") return;
         await Task.Delay(300).ConfigureAwait(false);
         var mpv = _music;
         if (mpv == null) return;
@@ -297,20 +343,49 @@ sealed class FlowPlayer
         if (idle?.Type == JTokenType.Boolean && (bool)idle && _decision?.Genre != null) Load(_decision, true);
     }
 
-    /// <summary>Bekçi: motor boşta kaldıysa ya da kendiliğinden duraklatıldıysa yeniden çal.</summary>
+    double _watchPos = -1;
+    int _stuckChecks;
+
+    /// <summary>
+    /// Bekçi (10 sn'de bir): motor boşta kaldıysa ya da kendiliğinden duraklatıldıysa yeniden çal; şarkı 30 sn ilerlemediyse
+    /// (örn. okunamayan parça) sonrakine geç (1.0.2, karar Onur: bozuk şarkı yeniden indirilmez, atlanır).
+    /// </summary>
     async Task Watchdog()
     {
         var mpv = _music;
-        if (!_running || _paused || _breakTitle != null || _reloading == 1 || _decision?.Genre == null || mpv == null || _loadedKey == "") return;
+        if (!_running || _paused || _breakTitle != null || _reloading == 1 || _decision?.Genre == null || mpv == null || _loadedKey == "")
+        {
+            _stuckChecks = 0;
+            _watchPos = -1;
+            return;
+        }
         var idle = await mpv.GetAsync("idle-active").ConfigureAwait(false);
         if (idle?.Type == JTokenType.Boolean && (bool)idle)
         {
             Log.Warn("Müzik boşta kalmış; yeniden başlatılıyor");
+            _stuckChecks = 0;
             Load(_decision!, false);
             return;
         }
         var paused = await mpv.GetAsync("pause").ConfigureAwait(false);
-        if (paused?.Type == JTokenType.Boolean && (bool)paused) mpv.Set("pause", false);
+        if (paused?.Type == JTokenType.Boolean && (bool)paused)
+        {
+            mpv.Set("pause", false);
+            return;
+        }
+        var t = await mpv.GetAsync("time-pos").ConfigureAwait(false);
+        var pos = t?.Type is JTokenType.Float or JTokenType.Integer ? (double)t : -1;
+        var stuck = pos < 0 || Math.Abs(pos - _watchPos) < 0.5;
+        _watchPos = pos;
+        if (!stuck || _breakTitle != null || _paused)
+        {
+            _stuckChecks = 0;
+            return;
+        }
+        if (++_stuckChecks < 3) return;
+        _stuckChecks = 0;
+        Log.Warn($"Şarkı 30 sn ilerlemedi ({_current?.Title ?? "?"}); sonrakine geçiliyor");
+        mpv.Command("playlist-next", "force");
     }
 
     // ---------- düğmeler ----------
@@ -450,6 +525,7 @@ sealed class FlowPlayer
         else if (d == null) status = "Paket bekleniyor";
         else if (d.Genre == null) status = $"{d.WaitingFor} iniyor; ilk şarkılar inince yayın başlar";
         else if (_paused) status = "Duraklatıldı";
+        else if (_audioIssue != null && _current == null) status = _audioIssue;
         else if (d.WaitingFor != null) status = $"{d.WaitingFor} iniyor; o inene kadar {d.GenreName} çalıyor";
         else status = "Çalıyor";
         return new JObject
@@ -467,6 +543,7 @@ sealed class FlowPlayer
             ["gate"] = _gateReason,
             ["breakTitle"] = _breakTitle,
             ["paused"] = _paused,
+            ["audioIssue"] = _current == null ? _audioIssue : null,
             ["skipWaitMs"] = SkipWaitMs(),
             ["offlineDaysLeft"] = Clock.OfflineDaysLeft(),
             ["slots"] = m == null ? null : new JArray(m.Slots.OrderBy(s => s.Hour).Select(s =>

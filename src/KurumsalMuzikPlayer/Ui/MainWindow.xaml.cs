@@ -39,8 +39,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        WordmarkSub.Text = Visuals.Tracked("MÜZİK · BY VIVA MEDYA");
-        LoginSub.Text = Visuals.Tracked("MÜZİK · BY VIVA MEDYA");
+        foreach (var by in new[] { RailBy, LoginBy, ExpiredBy }) by.Text = Visuals.Tracked("BY") + "  ";
+        foreach (var viva in new[] { RailViva, LoginViva, ExpiredViva }) viva.Text = Visuals.Tracked("VİVA MEDYA");
         StoreEyebrow.Text = Visuals.Tracked("MAĞAZA");
         AnnCardEyebrow.Text = Visuals.Tracked("SIRADAKİ ANONS");
         RecentEyebrow.Text = Visuals.Tracked("SON ÇALANLAR");
@@ -72,7 +72,23 @@ public partial class MainWindow : Window
         };
         LocationChanged += (_, _) => { placement.Stop(); placement.Start(); };
         SizeChanged += (_, _) => { placement.Stop(); placement.Start(); };
-        Closing += (_, _) => WindowPlacement.Save(this, Scaler.ActualWidth / WindowFrame.DesignWidth);
+        Closing += (_, e) =>
+        {
+            WindowPlacement.Save(this, Scaler.ActualWidth / WindowFrame.DesignWidth);
+            if (_quitting) return;
+            // 1.0.2 (karar Onur): kapatınca süreç kapanmaz, pencere gizlenir (tepside); yeniden açınca beklemeden gelir.
+            e.Cancel = true;
+            Hide();
+            Log.Info("Pencere gizlendi (tepside)");
+        };
+        // Gizliyken ekran güncellenmez; açılınca son durum bir kez çizilir.
+        IsVisibleChanged += (_, _) =>
+        {
+            if (!IsVisible || _hiddenState == null) return;
+            var s = _hiddenState;
+            _hiddenState = null;
+            ApplyState(s);
+        };
 
         Strip.SizeChanged += (_, _) => DrawNowMark();
         ProgressTrack.SizeChanged += (_, _) => DrawProgress();
@@ -91,10 +107,14 @@ public partial class MainWindow : Window
             case "ping":
                 var n = (int?)m["n"] ?? 0;
                 Dispatcher.BeginInvoke(new Action(() =>
-                    _link.Send(new JObject { ["t"] = "pong", ["n"] = n, ["min"] = WindowState == WindowState.Minimized })));
+                    _link.Send(new JObject { ["t"] = "pong", ["n"] = n, ["min"] = WindowState == WindowState.Minimized || !IsVisible })));
                 break;
             case "state":
-                Dispatcher.BeginInvoke(new Action(() => ApplyState(m)));
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (IsVisible) ApplyState(m);
+                    else _hiddenState = m;
+                }));
                 break;
             case "show":
                 Dispatcher.BeginInvoke(new Action(BringToFront));
@@ -104,7 +124,7 @@ public partial class MainWindow : Window
                 break;
             case "close":
                 _link.Close();
-                Dispatcher.BeginInvoke(new Action(Close));
+                Dispatcher.BeginInvoke(new Action(Quit));
                 break;
         }
     }
@@ -191,15 +211,17 @@ public partial class MainWindow : Window
         var album = (string?)s["sub"] ?? "";
         var status = (string?)s["status"] ?? "";
         var paused = (bool?)s["paused"] == true && gate == null;
+        var noAudio = s["audioIssue"] is { Type: JTokenType.String } && gate == null;
 
         string eyebrow;
         if (gate != null) eyebrow = "YAYIN DURDU";
         else if (breakTitle != null) eyebrow = "ANONS ÇALIYOR";
         else if (paused) eyebrow = "DURAKLATILDI";
+        else if (noAudio) eyebrow = "SES ÇIKIŞI YOK";
         else if (genre == null) eyebrow = "YAYIN HAZIRLANIYOR";
         else eyebrow = $"ŞU AN ÇALIYOR · {slotHour:00}:00 DİLİMİ";
         LiveEyebrow.Text = Visuals.Tracked(eyebrow);
-        var red = gate == null && !paused;
+        var red = gate == null && !paused && !noAudio;
         LiveEyebrow.Foreground = red ? (Brush)FindResource("Vm") : (Brush)FindResource("Fg3");
         LiveDot.Fill = red ? (Brush)FindResource("Vm") : (Brush)FindResource("Fg3");
         LiveHalo.Visibility = red ? Visibility.Visible : Visibility.Collapsed;
@@ -258,8 +280,8 @@ public partial class MainWindow : Window
         PlayButton.ToolTip = paused ? "Devam et (kaldığı yerden)" : "Duraklat";
         SkipWait.Text = wait > 0 ? ((wait + 999) / 1000).ToString() : "";
 
-        LiveTagText.Text = Visuals.Tracked(gate != null ? "DURDU" : paused ? "DURAKLATILDI" : breakTitle != null ? "ANONS" : "CANLI");
-        var tagBrush = gate != null || paused ? (Brush)FindResource("Fg3") : (Brush)FindResource("Vm");
+        LiveTagText.Text = Visuals.Tracked(gate != null ? "DURDU" : paused ? "DURAKLATILDI" : noAudio ? "SES YOK" : breakTitle != null ? "ANONS" : "CANLI");
+        var tagBrush = gate != null || paused || noAudio ? (Brush)FindResource("Fg3") : (Brush)FindResource("Vm");
         LiveTagText.Foreground = tagBrush;
         LiveTag.BorderBrush = tagBrush;
 
@@ -718,6 +740,16 @@ public partial class MainWindow : Window
         ProgressFill.Width = ProgressTrack.ActualWidth * ratio;
     }
 
+    bool _quitting;
+    JObject? _hiddenState;
+
+    /// <summary>Gerçekten kapan (motor kapanıyor, güncelleme kuruluyor ya da Windows kapanıyor).</summary>
+    public void Quit()
+    {
+        _quitting = true;
+        Close();
+    }
+
     void BringToFront()
     {
         if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
@@ -752,6 +784,13 @@ public partial class MainWindow : Window
         PlayIcon.Data = (Geometry)FindResource(_paused ? "IconPlay" : "IconPause");
         PlayIcon.Margin = new Thickness(_paused ? 3 : 0, 0, 0, 0);
         _link.Send(new JObject { ["t"] = "pause", ["on"] = _paused });
+    }
+
+    /// <summary>Logonun altındaki "VİVA MEDYA": vivamedya.com.</summary>
+    void Viva_Click(object sender, RoutedEventArgs e)
+    {
+        try { Process.Start("https://vivamedya.com")?.Dispose(); }
+        catch (Exception ex) { Log.Warn($"Tarayıcı açılamadı: {ex.Message}"); }
     }
 
     /// <summary>Destek sayfası (kurumsalmuzik.net/destek): e-posta ve WhatsApp.</summary>

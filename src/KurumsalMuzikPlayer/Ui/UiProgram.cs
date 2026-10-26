@@ -17,20 +17,28 @@ static class UiProgram
         AppDomain.CurrentDomain.UnhandledException += (_, e) => Log.Error("Pencere çöktü", e.ExceptionObject as Exception);
         // Eski/zayıf ekran kartlarında takılmasın: arayüz yazılımla çizilir (BRIEF §3).
         RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
-        var app = new Application { ShutdownMode = ShutdownMode.OnMainWindowClose };
+        // Pencere kapatılınca gizlenir (MainWindow.Closing); süreç ancak Quit ile biter.
+        var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         app.DispatcherUnhandledException += (_, e) =>
         {
             Log.Error("Pencere hatası", e.Exception);
             e.Handled = true;
         };
         var window = new MainWindow();
+        window.Closed += (_, _) => app.Shutdown();
+        app.SessionEnding += (_, _) => window.Quit();
         if (minimized)
         {
-            window.WindowState = WindowState.Minimized;
-            window.ShowActivated = false;
+            // Windows açılışında ya da donma sonrası: pencere çizilmeden arka planda hazır bekler (tepside).
+            new WindowInteropHelper(window).EnsureHandle();
+            Log.Info("Pencere arka planda açıldı (tepside)");
         }
-        Log.Info("Pencere açıldı");
-        app.Run(window);
+        else
+        {
+            window.Show();
+            Log.Info("Pencere açıldı");
+        }
+        app.Run();
         Log.Info("Pencere kapandı");
         return 0;
     }

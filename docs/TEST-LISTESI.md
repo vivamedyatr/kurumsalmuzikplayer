@@ -45,6 +45,8 @@ Aşağıdaki liste bu testler için bir rehberdir.
 | 15 | **1.0.1:** alt çubuktaki kırmızı düğmeyle duraklat, 1–2 dk bekle, devam et | Aynı şarkı kaldığı saniyeden sürer. Duraklatılmışken "DURAKLATILDI" yazar, anons çalmaz, "Sonraki" kapalı. Panelin yayın kaydında o aralık "durdu". |
 | 16 | **1.0.1:** sol rayda "Çıkış yap" → Vazgeç, sonra tekrar → Çıkış yap | Vazgeç'te hiçbir şey değişmez. Çıkışta müzik durur, giriş ekranında "Çıkış yapıldı" yazar. Aynı şube adıyla girince yeni cihaz hakkı harcanmaz, arşiv yeniden inmez. |
 | 17 | **1.0.1:** sol raydaki, giriş ekranındaki ve "Yayın durdu" ekranındaki "Destek ↗" | Tarayıcıda kurumsalmuzik.net/destek açılır (WhatsApp ve e-posta). |
+| 18 | **1.0.2:** pencereyi kapat (X), tepsiden ya da kısayoldan aç | Beklemeden açılır (süreç kapanmamıştı). Logo "KURUMSAL / MÜZİK NET", altında "BY VİVA MEDYA"; VİVA MEDYA'ya tıklayınca vivamedya.com açılır. |
+| 19 | **1.0.2:** çalarken hoparlörü/ses kablosunu çıkar (ya da Windows ses aygıtını devre dışı bırak), 1 dk bekle, geri tak | Ekranda "SES ÇIKIŞI YOK" yazar; geri takınca en geç 30 sn'de müzik kendiliğinden başlar. Panel yayın kaydında o arada sahte şarkı yok. |
 
 ## 4. Uzaktan izleme (panelden)
 
