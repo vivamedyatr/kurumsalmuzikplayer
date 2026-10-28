@@ -222,6 +222,15 @@ düzeltilir. ~~Gerçek bir mağazada bir hafta~~; indirme adresinin 1.0'a çevri
 - ~~Sessize alma düğmesi.~~ → 1.0.1'de duraklat/devam (§2.1a #7).
 - Windows 7'de TLS 1.2 / kök sertifika eksikse kurulumda ya da girişte açık bir uyarı (§3).
 - "Günlüğü gönder" (uzaktan destek için günlüğü sunucuya yükleme, §4).
+- Süre dolunca ödeme adresini (web'deki yenileme sayfası, web BRIEF §13.5) tıklanır "Hizmet ödemesi yap" düğmesi
+  olarak göstermek; bugün adres yazı olarak görünür.
+
+**Onur'un testlerinde açık olanlar (28 Eki 2026):**
+- Windows 7'de sorunsuz çalışıyor (Onur'un testi, 26 Eki 2026); testler sürüyor.
+- Arka planda başka işler yapılırken nadir **cızırtı**: Onur aynı bilgisayarda YouTube/Spotify ile karşılaştırıp saatleri
+  not ediyor; sonuca göre karar verilecek (kod değişikliği yok).
+- **32 bit:** program 64 bit kalıyor; Onur müşteri bilgisayarlarının sistem türüne bakıp 32 bit gerekip gerekmediğini söyleyecek.
+- Bozuk/okunamayan şarkı yeniden indirilmez, atlanır (karar Onur, 26 Eki 2026; 1.0.2'deki bekçi yeterli).
 
 **Bilinen sınırlar:**
 - Saat geri alınırsa: 7 gün kuralı son başarılı bağlantı ve sunucudan öğrenilen saat farkıyla işler; internet yokken
@@ -244,6 +253,6 @@ Kanıt senaryoları mağaza denemesi yerine Onur'un kendi testlerinde (karar 25 
 
 - [x] **1.0.2** (26 Eki 2026, yapı 102; §2.1b): resmî logo + Viva Medya bağlantısı, pencere gizlenir (süreç kapanmaz), ilerlemeyen şarkıyı atlayan bekçi, ses çıkışı yokken hata fırtınasının önlenmesi. Onur'un bilgisayarında denendi (gizle/aç 0,1 sn; olmayan ses aygıtıyla `KMP_SES_AYGITI` denemesi: 30 sn'de bir tek satır, sahte kayıt yok). **Yayında** (26 Eki 2026, `/indir/kmp/` ve sabit adres; etiket `v1.0.2`).
 
-**Belgeler (25 Eki 2026'da güncellendi):** bu BRIEF; derleme ve deneme `docs/KURULUM.md`; test rehberi
+**Belgeler (28 Eki 2026'da güncellendi):** bu BRIEF; derleme ve deneme `docs/KURULUM.md`; test rehberi
 `docs/TEST-LISTESI.md`; sunucu, yayın ve mağaza kurulumu dahil her şey `../kurumsalmuzik/docs/KURULUM-KILAVUZU.html` §12
 (kopyası proje kökünde); web tarafı test listesi kökteki `TEST-LISTESI.html` (offline bölümü 1.0'a göre).
