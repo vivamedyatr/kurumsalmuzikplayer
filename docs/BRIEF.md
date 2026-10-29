@@ -217,12 +217,15 @@ düzeltilir. ~~Gerçek bir mağazada bir hafta~~; indirme adresinin 1.0'a çevri
 ## 9. Açık sorular ve sonraki sürüm adayları (25 Eki 2026)
 
 **Kararı Onur'da olanlar** (ayrıntı `docs/TEST-LISTESI.md` §6):
-1. **Cloudflare Workers Paid** (aylık 5 $): aynı gün ~15'ten fazla şube kurulacaksa önce geçilmeli (§5).
+1. **Cloudflare Workers Paid** (aylık 5 $): aynı gün ~15'ten fazla şube kurulacaksa önce geçilmeli (§5). Onur geçince
+   haber verecek (29 Eki 2026); o güne kadar tekrar önerilmez.
 2. ~~**Web temizliği:** Worker'daki `/e/` ve manifestteki `media.archive` sonraki web yayınında kaldırılır (onay bekliyor).~~
    → Yapıldı, canlıda 29 Eki 2026 (web `b38048d`, Worker `f2fc10d8`).
-3. **2.x'in güncelleme dosyası** (`/indir/latest.yml`) ve eski adlı `VM-Radio-Player-2.0-Kurulum.exe`: 2.0.17'de mi
-   kalsın, yoksa son bir 2.x sürümüyle 1.0'a mı yönlendirilsin.
-4. **Eski Java programın müşterileri** (sunucusu yıl sonunda kapanıyor): Kurumsal Müzik Net hesabı + 1.0 ile geçiş planı.
+3. ~~**2.x'in güncelleme dosyası** (`/indir/latest.yml`) ve eski adlı `VM-Radio-Player-2.0-Kurulum.exe`: 2.0.17'de mi
+   kalsın, yoksa son bir 2.x sürümüyle 1.0'a mı yönlendirilsin.~~ → Kapandı (Onur, 29 Eki 2026): 2.x ("VM Radio Player")
+   iptal edilen bir beta denemesiydi, hiçbir müşteri kullanmıyor. Son 2.x sürümü ya da 2.x'ten geçiş gerekmez.
+4. **Eski Java programın müşterileri** (sunucusu yıl sonunda kapanıyor): Kurumsal Müzik Net hesabı + 1.0 ile geçiş.
+   Geçişi Onur yürütür ve başladığında haber verir (29 Eki 2026); Claude kendiliğinden plan önermez.
 5. **Kod imzalama:** antivirüs/SmartScreen sorunu çıkarsa yeniden değerlendirilir (§2.1 #3).
 
 **Programda olmayanlar — sonraki sürüm adayları** (Onur'un testlerine göre sıralanır; her biri ayrı onayla):

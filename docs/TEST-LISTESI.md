@@ -81,10 +81,11 @@ Testte eksik olarak not edilebilir; öncelik Onur'un:
    1.0.x yayınında `scripts/yayinla.sh` bunu da günceller). Eski adlı `VM-Radio-Player-2.0-Kurulum.exe` 2.0.17'de kaldı;
    2.0.17'nin kendi dosyası (`…-2.0.17.exe`) sunucuda duruyor (geri dönüş gerekirse). 2.x'in güncelleme dosyası
    (`/indir/latest.yml`) ayrıca bir karar: 2.0.17'ler olduğu gibi kalır ya da son bir 2.x sürümüyle 1.0'a yönlendirilir.
-3. **2.x şubelerin geçişi (karar: elle kurulum):** 1.0 kurulur → aynı şube adıyla giriş (2.x'in cihazını devralır) →
+3. ~~**2.x şubelerin geçişi (karar: elle kurulum):**~~ Gerekmez (Onur, 29 Eki 2026): 2.x bir beta denemesiydi, kullanan müşteri yok. Eski not: 1.0 kurulur → aynı şube adıyla giriş (2.x'in cihazını devralır) →
    arşiv bir kez yeniden iner (2–3 saat; o sırada inen şarkılar çalar) → 2.x kaldırılır.
 4. **Cloudflare Workers Paid** (aylık 5 $): ücretsiz plan günde 100.000 istek; bir şubenin ilk kurulumu ~6.000 istek.
    Aynı gün ~15'ten fazla şube kurulacaksa önce geçilmeli.
 5. ~~**Web temizliği** (sonraki web yayını): Worker'daki `/e/` adresi ve manifestteki `media.archive` kaldırılır
    (1.0 artık kullanmıyor).~~ → Yapıldı, canlıda 29 Eki 2026 (web `b38048d`, Worker `f2fc10d8`).
-6. **Eski Java programın müşterileri** (sunucu yıl sonunda kapanıyor): Kurumsal Müzik Net'e hesap + 1.0.
+6. **Eski Java programın müşterileri** (sunucu yıl sonunda kapanıyor): Kurumsal Müzik Net'e hesap + 1.0. Geçişi Onur
+   yürütür, başladığında haber verir.
