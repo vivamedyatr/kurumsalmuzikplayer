@@ -55,6 +55,12 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 | 12 | Bozuk şarkı | Yeniden indirilmez (karar Onur): şarkı 30 sn ilerlemezse bekçi sonrakine geçer. |
 | 13 | Ses çıkışı yok | Hoparlör/ses aygıtı yoksa (çıkarıldı, kapalı uzak masaüstü oturumu) mpv her şarkıyı anında bitiriyordu: 1.0.0–1.0.1'de günlüğe dakikada ~800 satır ve panele sahte "çaldı" kaydı (26 Eki'de Onur'un bilgisayarında görüldü). 1.0.2: art arda 3 hatada çalma durur, ekranda "SES ÇIKIŞI YOK", 30 sn'de bir yeniden denenir; "çaldı" kaydı ancak şarkı 1,5 sn çaldıktan sonra yazılır. |
 
+### 2.1c 1.0.3 (29 Eki 2026)
+
+| # | Konu | Karar |
+|---|---|---|
+| 14 | Pencere geri gelmiyor | Onur'un zayıf notebook'unda (Celeron, 2 çekirdek, 4 GB, Windows 10 1903) 15 dk simge durumunda kalan pencere geri getirilince ekrana gelmedi; günlüğe göre pencere süreci yanıt veriyordu (donma, yeniden açma yok). 1.0.3: pencere simge durumundan ya da tepsiden her geri gelişte başlık çubuğu ekranda değilse ortaya alınır ve tamamı yeniden çizdirilir; pencere durumu (simge/normal/gizli/öne getirme), Windows oturum kilidi ve ekran ayarı değişimi günlüğe yazılır. Notebook'ta denendi (29 Eki): 30+ kez simge durumundan ve tepsiden geri geldi, en uzun bekleme ~4 dk. Exe özelliklerindeki ürün adı ve telif satırındaki bozuk karakterler düzeltildi. |
+
 ### 2.2 Eski BRIEF'ten aynen geçen kararlar (özet; ayrıntı orada)
 
 - **Platform:** Windows 7 SP1, 8, 8.1, 10, 11 — 64 bit. Tek program, tek kurulum dosyası, kullanıcı bazlı kurulum (yönetici izni istemez).
@@ -252,6 +258,8 @@ Kanıt senaryoları mağaza denemesi yerine Onur'un kendi testlerinde (karar 25 
 - [x] **1.0.1** (25 Eki 2026, yapı 101; Onur'un ilk istekleri): hesaptan çıkış, duraklat/devam, Destek bağlantısı, "Yayın akışı" adı (§2.1a). Derlendi, 21 test geçti; Onur'un bilgisayarına kuruldu, duraklat/devam (aynı saniyeden sürdü), çıkış onayı (Vazgeç) ve Yayın akışı denendi; gerçek çıkış Onur'da. Web `/destek` canlıda (49aa1d8), **1.0.1 yayında** (`/indir/kmp/`, sabit adres de 1.0.1; GitHub etiketi `v1.0.1`). Ayrıca: gece yarısından sonra Yayın akışı sayfasında son dilim "ÇALIYOR" görünür.
 
 - [x] **1.0.2** (26 Eki 2026, yapı 102; §2.1b): resmî logo + Viva Medya bağlantısı, pencere gizlenir (süreç kapanmaz), ilerlemeyen şarkıyı atlayan bekçi, ses çıkışı yokken hata fırtınasının önlenmesi. Onur'un bilgisayarında denendi (gizle/aç 0,1 sn; olmayan ses aygıtıyla `KMP_SES_AYGITI` denemesi: 30 sn'de bir tek satır, sahte kayıt yok). **Yayında** (26 Eki 2026, `/indir/kmp/` ve sabit adres; etiket `v1.0.2`).
+
+- [x] **1.0.3** (29 Eki 2026, yapı 103; §2.1c): simge durumundan/tepsiden geri gelen pencere ekrana alınır ve yeniden çizdirilir; pencere, oturum ve ekran olayları günlükte. Onur'un notebook'unda denendi. **Yayında** (29 Eki 2026, `/indir/kmp/` ve sabit adres; etiket `v1.0.3`).
 
 **Belgeler (28 Eki 2026'da güncellendi):** bu BRIEF; derleme ve deneme `docs/KURULUM.md`; test rehberi
 `docs/TEST-LISTESI.md`; sunucu, yayın ve mağaza kurulumu dahil her şey `../kurumsalmuzik/docs/KURULUM-KILAVUZU.html` §12

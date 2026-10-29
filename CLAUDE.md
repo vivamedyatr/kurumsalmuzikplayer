@@ -38,8 +38,8 @@ Onur Özden. Viva Medya'yı tek başına işletiyor; tam zamanlı yazılımcı d
 - PowerShell'de her komutta PATH'i kayıt defterinden tazele (`$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")`).
 
 ## Yayın
-- **1.0.2 yayında** (26 Eki 2026, yapı 102; ilk final 1.0.0 yapı 100). Onur farklı Windows ortamlarında test ediyor; bulduğu hata yeni
-  sürümle düzeltilir (1.0.1, 1.0.2…). Her yayın: `Directory.Build.props` (sürüm + FileVersion'ın son parçası bir artar)
+- **1.0.3 yayında** (29 Eki 2026, yapı 103; ilk final 1.0.0 yapı 100). Onur farklı Windows ortamlarında test ediyor; bulduğu hata yeni
+  sürümle düzeltilir (1.0.1, 1.0.2, 1.0.3…). Her yayın: `Directory.Build.props` (sürüm + FileVersion'ın son parçası bir artar)
   → `scripts/kurulum.ps1` → `bash scripts/yayinla.sh` (**her yayın Onur onayıyla**) → commit, `git tag v1.0.x`, push.
 - Yayın betiği sunucuya Tailscale ile `onur@kurumsalmuzik-vps.tail8660b4.ts.net` üzerinden bağlanır; sitedeki sabit
   indirme adresini de günceller. 2.x'in `/indir/latest.yml`'ine dokunulmaz.

@@ -47,6 +47,7 @@ Aşağıdaki liste bu testler için bir rehberdir.
 | 17 | **1.0.1:** sol raydaki, giriş ekranındaki ve "Yayın durdu" ekranındaki "Destek ↗" | Tarayıcıda kurumsalmuzik.net/destek açılır (WhatsApp ve e-posta). |
 | 18 | **1.0.2:** pencereyi kapat (X), tepsiden ya da kısayoldan aç | Beklemeden açılır (süreç kapanmamıştı). Logo "KURUMSAL / MÜZİK NET", altında "BY VİVA MEDYA"; VİVA MEDYA'ya tıklayınca vivamedya.com açılır. |
 | 19 | **1.0.2:** çalarken hoparlörü/ses kablosunu çıkar (ya da Windows ses aygıtını devre dışı bırak), 1 dk bekle, geri tak | Ekranda "SES ÇIKIŞI YOK" yazar; geri takınca en geç 30 sn'de müzik kendiliğinden başlar. Panel yayın kaydında o arada sahte şarkı yok. |
+| 20 | **1.0.3:** pencereyi simge durumuna küçült, en az 15 dk bekle (ekran kapansın ya da kilitlensin), görev çubuğundan geri getir; ayrıca X ile kapatıp tepsiden aç | Pencere her seferinde ekrana gelir. Günlükte "Pencere durumu: Minimized / Normal" ve "Pencere geri geldi: konum …" satırları var. |
 
 ## 4. Uzaktan izleme (panelden)
 
@@ -74,7 +75,7 @@ Testte eksik olarak not edilebilir; öncelik Onur'un:
 
 ## 6. Dağıtım (her biri Onur'un kararı)
 
-1. **Sürüm adı:** **1.0.0** (yapı 100; 25 Eki 2026) → **1.0.1** (yapı 101; 25 Eki 2026: çıkış, duraklat, Destek, Yayın akışı) → **1.0.2** (yapı 102; 26 Eki 2026: logo, pencere gizlenir, takılan şarkı atlanır, ses çıkışı yok). Sonrakiler 1.0.3… (yapı numarası her yayında artar).
+1. **Sürüm adı:** **1.0.0** (yapı 100; 25 Eki 2026) → **1.0.1** (yapı 101; 25 Eki 2026: çıkış, duraklat, Destek, Yayın akışı) → **1.0.2** (yapı 102; 26 Eki 2026: logo, pencere gizlenir, takılan şarkı atlanır, ses çıkışı yok) → **1.0.3** (yapı 103; 29 Eki 2026: simge durumundan geri gelmeyen pencere). Sonrakiler 1.0.4… (yapı numarası her yayında artar).
 2. **Sabit indirme adresi:** ~~bugün 2.0.17'yi veriyor~~ → `kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe`
    **1.0.0'ı veriyor** (karar Onur, 25 Eki 2026; müşteri e-postaları ve sitedeki bağlantılar bu adresi kullanıyor; her yeni
    1.0.x yayınında `scripts/yayinla.sh` bunu da günceller). Eski adlı `VM-Radio-Player-2.0-Kurulum.exe` 2.0.17'de kaldı;
