@@ -148,7 +148,8 @@ yeni, rastgele görünen dosya). Fidye yazılımları tam olarak bunu yapar; dav
 önce Workers Paid (aylık 5 $, 10 milyon istek dahil) gerekir (karar Onur'da).
 
 **Sunucu tarafı:** web `7ce81e9` (Worker `84590864`) ile canlıya giden `/e/` adresi ve manifestteki `media.archive`
-artık kullanılmıyor; **sonraki web yayınında kaldırılacak** (karar Onur 24 Eki 2026). `X-App: kmp` kalır (X/Y anonsları).
+~~artık kullanılmıyor; **sonraki web yayınında kaldırılacak** (karar Onur 24 Eki 2026)~~ → **kaldırıldı**, canlıda 29 Eki 2026
+(web `b38048d`, Worker `f2fc10d8`; geri dönüş Worker `84590864`). `/e/` artık 404; `/m/` değişmedi. `X-App: kmp` kalır (X/Y anonsları).
 
 **Çalma:** program içinde sadece bu bilgisayardan erişilen (127.0.0.1, rastgele oturum adresli) küçük bir adres her
 şarkıyı mpv'ye HLS listesi olarak verir; parçalar istendiği anda kaptan okunup bellekte çözülür.
@@ -180,7 +181,7 @@ Akış ve anons kuralları web'den **birebir** C#'a çevrilir ve web'in testleri
    **Yapıldı** (web `7ce81e9`, canlı 23 Eki 2026). ~~Panelde cihaz "Offline · KMP 1.0.3" diye görünür.~~ → Panelde ayrı
    bir "KMP" etiketi yapılmadı; cihaz 2.x gibi "Offline" + sürüm numarasıyla (1.0.x) görünür, 2.x'ten sürümle ayrılır.
 2. ~~**Worker "şifreli ver" kipi** (§5) ve manifestte paket anahtarı.~~ Yapıldı ve canlıya gitti (23 Eki), 24 Eki'de bırakıldı
-   (şifreleme player'da); `/e/` ve `media.archive` sonraki web yayınında kaldırılır.
+   (şifreleme player'da); `/e/` ve `media.archive` 29 Eki 2026'da kaldırıldı (web `b38048d`, Worker `f2fc10d8`).
 3. **Güncelleme dosyası:** `kurumsalmuzik.net/indir/kmp/` altında sürüm bilgisi (`latest.json`: sürüm, yapı numarası,
    dosya adı, SHA-256, boyut) ve kurulum dosyası; `scripts/yayinla.sh` yükler (sunucuda `/var/www/indir/kmp`, nginx'te
    `/indir/` zaten açık — web projesinde değişiklik gerekmez). İndirme adresi `/indir/Kurumsal-Muzik-Player-Kurulum.exe` 1.0 yayına girince 1.0'ı gösterir (o güne kadar 2.0.17).
@@ -217,7 +218,8 @@ düzeltilir. ~~Gerçek bir mağazada bir hafta~~; indirme adresinin 1.0'a çevri
 
 **Kararı Onur'da olanlar** (ayrıntı `docs/TEST-LISTESI.md` §6):
 1. **Cloudflare Workers Paid** (aylık 5 $): aynı gün ~15'ten fazla şube kurulacaksa önce geçilmeli (§5).
-2. **Web temizliği:** Worker'daki `/e/` ve manifestteki `media.archive` sonraki web yayınında kaldırılır (onay bekliyor).
+2. ~~**Web temizliği:** Worker'daki `/e/` ve manifestteki `media.archive` sonraki web yayınında kaldırılır (onay bekliyor).~~
+   → Yapıldı, canlıda 29 Eki 2026 (web `b38048d`, Worker `f2fc10d8`).
 3. **2.x'in güncelleme dosyası** (`/indir/latest.yml`) ve eski adlı `VM-Radio-Player-2.0-Kurulum.exe`: 2.0.17'de mi
    kalsın, yoksa son bir 2.x sürümüyle 1.0'a mı yönlendirilsin.
 4. **Eski Java programın müşterileri** (sunucusu yıl sonunda kapanıyor): Kurumsal Müzik Net hesabı + 1.0 ile geçiş planı.

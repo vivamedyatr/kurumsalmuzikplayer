@@ -85,6 +85,6 @@ Testte eksik olarak not edilebilir; öncelik Onur'un:
    arşiv bir kez yeniden iner (2–3 saat; o sırada inen şarkılar çalar) → 2.x kaldırılır.
 4. **Cloudflare Workers Paid** (aylık 5 $): ücretsiz plan günde 100.000 istek; bir şubenin ilk kurulumu ~6.000 istek.
    Aynı gün ~15'ten fazla şube kurulacaksa önce geçilmeli.
-5. **Web temizliği** (sonraki web yayını): Worker'daki `/e/` adresi ve manifestteki `media.archive` kaldırılır
-   (1.0 artık kullanmıyor).
+5. ~~**Web temizliği** (sonraki web yayını): Worker'daki `/e/` adresi ve manifestteki `media.archive` kaldırılır
+   (1.0 artık kullanmıyor).~~ → Yapıldı, canlıda 29 Eki 2026 (web `b38048d`, Worker `f2fc10d8`).
 6. **Eski Java programın müşterileri** (sunucu yıl sonunda kapanıyor): Kurumsal Müzik Net'e hesap + 1.0.
