@@ -84,10 +84,19 @@ public partial class MainWindow : Window
         // Gizliyken ekran güncellenmez; açılınca son durum bir kez çizilir.
         IsVisibleChanged += (_, _) =>
         {
-            if (!IsVisible || _hiddenState == null) return;
+            if (!IsVisible) return;
+            Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => Restored("açıldı")));
+            if (_hiddenState == null) return;
             var s = _hiddenState;
             _hiddenState = null;
             ApplyState(s);
+        };
+        // Zayıf notebook'ta (29 Eki 2026) simge durumundan geri getirilen pencere ekrana gelmedi; süreç çalışıyordu.
+        // Durum değişimleri günlüğe yazılır, geri gelince pencere ekrana alınıp yeniden çizdirilir.
+        StateChanged += (_, _) =>
+        {
+            Log.Info($"Pencere durumu: {WindowState}");
+            if (WindowState == WindowState.Normal) Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => Restored("geri geldi")));
         };
 
         Strip.SizeChanged += (_, _) => DrawNowMark();
@@ -750,8 +759,17 @@ public partial class MainWindow : Window
         Close();
     }
 
+    void Restored(string how)
+    {
+        if (!IsVisible || WindowState != WindowState.Normal) return;
+        var moved = WindowPlacement.EnsureOnScreen(this);
+        WindowFrame.Repaint(this);
+        Log.Info($"Pencere {how}: konum {Left:0},{Top:0}, boyut {ActualWidth:0}×{ActualHeight:0}{(moved ? ", ekran dışındaydı, ortaya alındı" : "")}");
+    }
+
     void BringToFront()
     {
+        Log.Info($"Pencere öne getiriliyor (durum {WindowState}, görünür {IsVisible})");
         if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
         Show();
         Activate();

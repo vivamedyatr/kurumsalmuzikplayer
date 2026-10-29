@@ -95,6 +95,8 @@ sealed class EngineHost : ApplicationContext
         _reportTimer = new System.Threading.Timer(_ => Log.Info("Durum: " + Report()), null, 600_000, 600_000);
 
         SystemEvents.PowerModeChanged += (_, e) => Log.Info($"Güç: {e.Mode}");
+        SystemEvents.SessionSwitch += (_, e) => Log.Info($"Oturum: {e.Reason}");
+        SystemEvents.DisplaySettingsChanged += (_, _) => Log.Info($"Ekran ayarı değişti: {Screen.PrimaryScreen?.Bounds.Width}×{Screen.PrimaryScreen?.Bounds.Height}");
         SystemEvents.SessionEnding += (_, e) =>
         {
             Log.Info($"Windows oturumu kapanıyor ({e.Reason})");

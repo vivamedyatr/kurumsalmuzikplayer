@@ -81,6 +81,20 @@ static class WindowFrame
         return Math.Max(Math.Min(MinScale, fit), Math.Min(Math.Min(MaxScale, fit), wanted));
     }
 
+    /// <summary>
+    /// Pencerenin tamamını hemen yeniden çizdirir. Yazılımla çizimde ekran kapanıp açılınca ya da uzun süre simge
+    /// durumunda kaldıktan sonra pencere boş/görünmez kalabiliyor (zayıf notebook, 29 Eki 2026).
+    /// </summary>
+    public static void Repaint(Window w)
+    {
+        var hwnd = new WindowInteropHelper(w).Handle;
+        if (hwnd == IntPtr.Zero) return;
+        (w.Content as UIElement)?.InvalidateVisual();
+        RedrawWindow(hwnd, IntPtr.Zero, IntPtr.Zero, RDW_INVALIDATE | RDW_ERASE | RDW_FRAME | RDW_ALLCHILDREN | RDW_UPDATENOW);
+    }
+
+    const uint RDW_INVALIDATE = 0x1, RDW_ERASE = 0x4, RDW_ALLCHILDREN = 0x80, RDW_UPDATENOW = 0x100, RDW_FRAME = 0x400;
+
     static void TryDarkTitleBar(IntPtr hwnd)
     {
         try
@@ -97,5 +111,6 @@ static class WindowFrame
     [DllImport("user32.dll")] static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
     [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
     [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr hWnd, out RECT rect);
+    [DllImport("user32.dll")] static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, uint flags);
     [DllImport("dwmapi.dll")] static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
 }

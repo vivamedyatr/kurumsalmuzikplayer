@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Windows;
 using Kmp.Core;
@@ -35,6 +36,22 @@ static class WindowPlacement
             w.Top = s.Top;
         }
         return scale;
+    }
+
+    /// <summary>
+    /// Pencere geri getirilince: başlık çubuğu ekranda değilse (ekran kapanıp açıldı, çözünürlük ya da monitör değişti)
+    /// çalışma alanının ortasına alınır. Taşındıysa true.
+    /// </summary>
+    public static bool EnsureOnScreen(Window w)
+    {
+        if (w.WindowState != WindowState.Normal) return false;
+        var screen = new Rect(SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
+            SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
+        if (screen.Contains(new Point(w.Left + 40, w.Top + 10)) && screen.Contains(new Point(w.Left + 200, w.Top + 10))) return false;
+        var work = SystemParameters.WorkArea;
+        w.Left = work.Left + Math.Max(0, (work.Width - w.ActualWidth) / 2);
+        w.Top = work.Top + Math.Max(0, (work.Height - w.ActualHeight) / 2);
+        return true;
     }
 
     public static void Save(Window w, double scale)
