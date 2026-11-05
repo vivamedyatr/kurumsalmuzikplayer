@@ -66,7 +66,7 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 - **Platform:** Windows 7 SP1, 8, 8.1, 10, 11 — 64 bit. Tek program, tek kurulum dosyası, kullanıcı bazlı kurulum (yönetici izni istemez).
 - **Arayüz:** ses aç/kıs, sonraki şarkı (10 sn'de bir, anons sırasında kapalı), çalma geçmişi, "Aylık yeni müzik" anahtarı. ~~Durdur yok~~ → 1.0.1'de duraklat/devam var (§2.1a #7); akış programda düzenlenmez ("Akışı düzenle" tarayıcıda açılır).
 - **Akış:** sadece tarz akışı; hesabın ortak "Offline akışı"; 7 günde bir değişir (sunucuda).
-- **Paket:** akış başına 6 GB, tarz başına en fazla 16 saat, albüm başına ilk 40 şarkı, 30 günde en fazla 5 albüm değişir (sunucuda).
+- **Paket:** akış başına 6 GB (104 saat), tarzlar bu bütçeyi paylaşır (kullanılmayan pay diğerlerine kalır; karar Onur 5 Kas 2026, önce tarz başına 16 saat), albüm başına ilk 40 şarkı, 30 günde en fazla 5 albüm değişir (sunucuda).
 - **İndirme:** en fazla 6 Mbps; önce çalan tarz, sonra sıradaki, sonra diğerleri; kesilip devam eder; inerken çalar (tarz en az 3 şarkısı inince).
 - **İnternetsiz:** 7 gün. Sonra "7 gündür internete bağlanılamadı…" der ve durur. Lisans günde bir, akış saatte bir, anonslar 15 dk'da bir sorulur.
 - **Anonslar:** web'deki planlar aynen (P1–P6, PA/PB/PC, saatli **X/Y**); müzik anons sırasında duraklar, kaldığı saniyeden sürer. Anonslar şifresiz.
