@@ -9,10 +9,10 @@
     <Company>Viva Medya</Company>
     <Product>Kurumsal Müzik Player</Product>
     <Copyright>© 2026 Viva Medya</Copyright>
-    <Version>1.0.3</Version>
-    <InformationalVersion>1.0.3</InformationalVersion>
+    <Version>1.0.4</Version>
+    <InformationalVersion>1.0.4</InformationalVersion>
     <!-- Güncelleme sırası: son parça her yayında artar (latest.json "build"). -->
-    <FileVersion>1.0.3.103</FileVersion>
+    <FileVersion>1.0.4.104</FileVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>

@@ -61,6 +61,12 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 |---|---|---|
 | 14 | Pencere geri gelmiyor | Onur'un zayıf notebook'unda (Celeron, 2 çekirdek, 4 GB, Windows 10 1903) 15 dk simge durumunda kalan pencere geri getirilince ekrana gelmedi; günlüğe göre pencere süreci yanıt veriyordu (donma, yeniden açma yok). 1.0.3: pencere simge durumundan ya da tepsiden her geri gelişte başlık çubuğu ekranda değilse ortaya alınır ve tamamı yeniden çizdirilir; pencere durumu (simge/normal/gizli/öne getirme), Windows oturum kilidi ve ekran ayarı değişimi günlüğe yazılır. Notebook'ta denendi (29 Eki): 30+ kez simge durumundan ve tepsiden geri geldi, en uzun bekleme ~4 dk. Exe özelliklerindeki ürün adı ve telif satırındaki bozuk karakterler düzeltildi. |
 
+### 2.1d 1.0.4 (karar Onur, 7 Kas 2026)
+
+| # | Konu | Karar |
+|---|---|---|
+| 15 | Lisans sorgusu sıklığı | Onur'un Windows 7 testinde (6 Kas) panelden son gün geçmişe çekildi, program 1 saatte durmadı: lisans günde bir sorulduğu için (Windows 7'ye özgü değil). Asıl sorun tersi: yayın durduktan sonra ödeme ya da uzatma 24 saate kadar yansımıyordu. 1.0.4: yayın **çalarken günde bir** (değişmedi); **hizmet süresi bittiği için durmuşken 30 dk'da bir**; durmasının üstünden **7 gün geçince sorgu yok, sadece program açılınca bir kez**. Sunucuya ulaşılamazsa eskisi gibi 15 dk'da bir yeniden denenir. Kural tek yerde: `Kmp.Core/LicenseSchedule.cs` (+ testleri). Sunucu, veritabanı ve Worker değişmez. Panelden süre **kısaltılması** yine en geç 24 saatte yansır (bilerek). |
+
 ### 2.2 Eski BRIEF'ten aynen geçen kararlar (özet; ayrıntı orada)
 
 - **Platform:** Windows 7 SP1, 8, 8.1, 10, 11 — 64 bit. Tek program, tek kurulum dosyası, kullanıcı bazlı kurulum (yönetici izni istemez).
@@ -68,7 +74,7 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 - **Akış:** sadece tarz akışı; hesabın ortak "Offline akışı"; 7 günde bir değişir (sunucuda).
 - **Paket:** akış başına 6 GB (104 saat), tarzlar bu bütçeyi paylaşır (kullanılmayan pay diğerlerine kalır; karar Onur 5 Kas 2026, önce tarz başına 16 saat), albüm başına ilk 40 şarkı, 30 günde en fazla 5 albüm değişir (sunucuda).
 - **İndirme:** en fazla 6 Mbps; önce çalan tarz, sonra sıradaki, sonra diğerleri; kesilip devam eder; inerken çalar (tarz en az 3 şarkısı inince).
-- **İnternetsiz:** 7 gün. Sonra "7 gündür internete bağlanılamadı…" der ve durur. Lisans günde bir, akış saatte bir, anonslar 15 dk'da bir sorulur.
+- **İnternetsiz:** 7 gün. Sonra "7 gündür internete bağlanılamadı…" der ve durur. Lisans günde bir (yayın durmuşken 30 dk'da bir, §2.1d), akış saatte bir, anonslar 15 dk'da bir sorulur.
 - **Anonslar:** web'deki planlar aynen (P1–P6, PA/PB/PC, saatli **X/Y**); müzik anons sırasında duraklar, kaldığı saniyeden sürer. Anonslar şifresiz.
 - **Tek bilgisayar:** aynı şube adıyla başka bilgisayardan girilirse eskisi en geç 15 dk içinde girişe döner.
 - **Yayın kaydı:** çalan şarkı, anons, açıldı/durdu; 15 dk'da bir `/api/offline/log`'a; internetsizken 7 güne kadar birikir.
@@ -265,6 +271,8 @@ Kanıt senaryoları mağaza denemesi yerine Onur'un kendi testlerinde (karar 25 
 - [x] **1.0.2** (26 Eki 2026, yapı 102; §2.1b): resmî logo + Viva Medya bağlantısı, pencere gizlenir (süreç kapanmaz), ilerlemeyen şarkıyı atlayan bekçi, ses çıkışı yokken hata fırtınasının önlenmesi. Onur'un bilgisayarında denendi (gizle/aç 0,1 sn; olmayan ses aygıtıyla `KMP_SES_AYGITI` denemesi: 30 sn'de bir tek satır, sahte kayıt yok). **Yayında** (26 Eki 2026, `/indir/kmp/` ve sabit adres; etiket `v1.0.2`).
 
 - [x] **1.0.3** (29 Eki 2026, yapı 103; §2.1c): simge durumundan/tepsiden geri gelen pencere ekrana alınır ve yeniden çizdirilir; pencere, oturum ve ekran olayları günlükte. Onur'un notebook'unda denendi. **Yayında** (29 Eki 2026, `/indir/kmp/` ve sabit adres; etiket `v1.0.3`).
+
+- [ ] **1.0.4** (yapı 104; §2.1d): yayın durmuşken lisans 30 dk'da bir sorulur, 7 gün sonra sadece açılışta. Yerelde derlendi, 25 test geçti (7 Kas 2026). **Yayınlanmadı.**
 
 **Belgeler (28 Eki 2026'da güncellendi):** bu BRIEF; derleme ve deneme `docs/KURULUM.md`; test rehberi
 `docs/TEST-LISTESI.md`; sunucu, yayın ve mağaza kurulumu dahil her şey `../kurumsalmuzik/docs/KURULUM-KILAVUZU.html` §12

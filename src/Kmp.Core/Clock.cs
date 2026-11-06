@@ -65,6 +65,12 @@ public static class Clock
         get { lock (Gate) return _s.LastOkAt; }
     }
 
+    /// <summary>Yayının durduğu an (tolerans dahil, sunucudan); bilinmiyorsa null.</summary>
+    public static long? ServiceEndsAt
+    {
+        get { lock (Gate) return _s.ServiceEndsAt; }
+    }
+
     /// <summary>İnternetsiz kalan gün hakkı (tam gün).</summary>
     public static int OfflineDaysLeft()
     {

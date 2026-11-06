@@ -49,6 +49,8 @@ Aşağıdaki liste bu testler için bir rehberdir.
 | 19 | **1.0.2:** çalarken hoparlörü/ses kablosunu çıkar (ya da Windows ses aygıtını devre dışı bırak), 1 dk bekle, geri tak | Ekranda "SES ÇIKIŞI YOK" yazar; geri takınca en geç 30 sn'de müzik kendiliğinden başlar. Panel yayın kaydında o arada sahte şarkı yok. |
 | 20 | **1.0.3:** pencereyi simge durumuna küçült, en az 15 dk bekle (ekran kapansın ya da kilitlensin), görev çubuğundan geri getir; ayrıca X ile kapatıp tepsiden aç | Pencere her seferinde ekrana gelir. Günlükte "Pencere durumu: Minimized / Normal" ve "Pencere geri geldi: konum …" satırları var. |
 
+| 21 | **1.0.4:** çalarken panelden son günü geçmişe çek; programı kapatıp aç (ya da bekle: en geç 24 saat) → yayın durur. Sonra panelden süreyi uzat, programa dokunma | Uzatmadan en geç 30 dk sonra müzik kendiliğinden başlar, şifre sorulmaz. |
+
 ## 4. Uzaktan izleme (panelden)
 
 - **Panel → hesap → Yayın kayıtları:** günlük çalan şarkılar, yayının açık/kapalı olduğu saatler. Boşluk = sorun.
