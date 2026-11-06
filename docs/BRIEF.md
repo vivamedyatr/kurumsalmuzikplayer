@@ -272,7 +272,7 @@ Kanıt senaryoları mağaza denemesi yerine Onur'un kendi testlerinde (karar 25 
 
 - [x] **1.0.3** (29 Eki 2026, yapı 103; §2.1c): simge durumundan/tepsiden geri gelen pencere ekrana alınır ve yeniden çizdirilir; pencere, oturum ve ekran olayları günlükte. Onur'un notebook'unda denendi. **Yayında** (29 Eki 2026, `/indir/kmp/` ve sabit adres; etiket `v1.0.3`).
 
-- [ ] **1.0.4** (yapı 104; §2.1d): yayın durmuşken lisans 30 dk'da bir sorulur, 7 gün sonra sadece açılışta. Yerelde derlendi, 25 test geçti (7 Kas 2026). **Yayınlanmadı.**
+- [x] **1.0.4** (7 Kas 2026, yapı 104; §2.1d): yayın durmuşken lisans 30 dk'da bir sorulur, 7 gün sonra sadece açılışta. Derlendi, 25 test geçti; kurulum dosyası Onur'a deneme için verildi, Onur onayıyla **yayında** (`/indir/kmp/` ve sabit adres, SHA-256 doğrulandı; etiket `v1.0.4`).
 
 **Belgeler (28 Eki 2026'da güncellendi):** bu BRIEF; derleme ve deneme `docs/KURULUM.md`; test rehberi
 `docs/TEST-LISTESI.md`; sunucu, yayın ve mağaza kurulumu dahil her şey `../kurumsalmuzik/docs/KURULUM-KILAVUZU.html` §12

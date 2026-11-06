@@ -2,7 +2,7 @@
 
 Kurumsal Müzik Net'in internetsiz çalan Windows programı (C# .NET Framework 4.8 + WPF + mpv). Viva Medya.
 
-Son sürüm **1.0.3** (29 Ekim 2026; ilk final 1.0.0, 25 Ekim 2026). İndirme: https://kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe
+Son sürüm **1.0.4** (7 Kasım 2026; ilk final 1.0.0, 25 Ekim 2026). İndirme: https://kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe
 
 | Belge | Ne |
 |---|---|

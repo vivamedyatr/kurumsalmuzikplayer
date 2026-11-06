@@ -77,7 +77,7 @@ Testte eksik olarak not edilebilir; öncelik Onur'un:
 
 ## 6. Dağıtım (her biri Onur'un kararı)
 
-1. **Sürüm adı:** **1.0.0** (yapı 100; 25 Eki 2026) → **1.0.1** (yapı 101; 25 Eki 2026: çıkış, duraklat, Destek, Yayın akışı) → **1.0.2** (yapı 102; 26 Eki 2026: logo, pencere gizlenir, takılan şarkı atlanır, ses çıkışı yok) → **1.0.3** (yapı 103; 29 Eki 2026: simge durumundan geri gelmeyen pencere). Sonrakiler 1.0.4… (yapı numarası her yayında artar).
+1. **Sürüm adı:** **1.0.0** (yapı 100; 25 Eki 2026) → **1.0.1** (yapı 101; 25 Eki 2026: çıkış, duraklat, Destek, Yayın akışı) → **1.0.2** (yapı 102; 26 Eki 2026: logo, pencere gizlenir, takılan şarkı atlanır, ses çıkışı yok) → **1.0.3** (yapı 103; 29 Eki 2026: simge durumundan geri gelmeyen pencere) → **1.0.4** (yapı 104; 7 Kas 2026: yayın durmuşken lisans 30 dk'da bir). Sonrakiler 1.0.5… (yapı numarası her yayında artar).
 2. **Sabit indirme adresi:** ~~bugün 2.0.17'yi veriyor~~ → `kurumsalmuzik.net/indir/Kurumsal-Muzik-Player-Kurulum.exe`
    **1.0.0'ı veriyor** (karar Onur, 25 Eki 2026; müşteri e-postaları ve sitedeki bağlantılar bu adresi kullanıyor; her yeni
    1.0.x yayınında `scripts/yayinla.sh` bunu da günceller). Eski adlı `VM-Radio-Player-2.0-Kurulum.exe` 2.0.17'de kaldı;
