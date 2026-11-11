@@ -21,7 +21,7 @@ Mağazalarda internet olmasa da çalan Windows programı. Kurumsal Müzik Net'e 
 aynı sunucu, aynı hesaplar, akışlar, anonslar ve panel. Eski Java programın (VM Offline Radio Player, sunucusu 2026 sonunda
 kapanıyor) yerini alır. "Arka plan / fon müziği" denmez.
 
-**Neden baştan (karar Onur, 23 Eki 2026):** önceki deneme (Electron, `../VM Offline Radio Player/`, sürüm 2.0.13–2.0.17)
+**Neden baştan (karar Onur, 23 Eki 2026):** önceki deneme (Electron, GitHub `vivamedyatr/vm-radio-player`; yerel klasör 11 Kas 2026'da silindi, sürüm 2.0.13–2.0.17)
 Onur'un yeni bilgisayarında (Windows 10 19045 + Kaspersky 21.27 + Acronis Active Protection) açılıştan 0–7 dk sonra
 donuyordu: Windows günlüğünde olay 1002 "AppHang", donan programın ana süreci. Aynı sürümler eski bilgisayarlarda
 donmuyordu. En güçlü olasılık: davranış tabanlı fidye korumasının, imzasız bir programın binlerce dosyayı tek tek
@@ -73,7 +73,7 @@ yazılmadıkça). Sunucu tarafı (`/api/offline/*`, offline paket, akış kurall
 |---|---|---|
 | 15 | Lisans sorgusu sıklığı | Onur'un Windows 7 testinde (6 Kas) panelden son gün geçmişe çekildi, program 1 saatte durmadı: lisans günde bir sorulduğu için (Windows 7'ye özgü değil). Asıl sorun tersi: yayın durduktan sonra ödeme ya da uzatma 24 saate kadar yansımıyordu. 1.0.4: yayın **çalarken günde bir** (değişmedi); **hizmet süresi bittiği için durmuşken 30 dk'da bir**; durmasının üstünden **7 gün geçince sorgu yok, sadece program açılınca bir kez**. Sunucuya ulaşılamazsa eskisi gibi 15 dk'da bir yeniden denenir. Kural tek yerde: `Kmp.Core/LicenseSchedule.cs` (+ testleri). Sunucu, veritabanı ve Worker değişmez. Panelden süre **kısaltılması** yine en geç 24 saatte yansır (bilerek). |
 
-### 2.2 Eski BRIEF'ten aynen geçen kararlar (özet; ayrıntı orada)
+### 2.2 Eski BRIEF'ten aynen geçen kararlar (özet; ayrıntı `docs/2x-BRIEF.md`'de)
 
 - **Platform:** Windows 7 SP1, 8, 8.1, 10, 11 — 64 bit. Tek program, tek kurulum dosyası, kullanıcı bazlı kurulum (yönetici izni istemez).
 - **Arayüz:** ses aç/kıs, sonraki şarkı (10 sn'de bir, anons sırasında kapalı), çalma geçmişi, "Aylık yeni müzik" anahtarı. ~~Durdur yok~~ → 1.0.1'de duraklat/devam var (§2.1a #7); akış programda düzenlenmez ("Akışı düzenle" tarayıcıda açılır).
@@ -181,7 +181,7 @@ başlıklarıyla (sonuncusu §7.1):
 | `POST /api/offline/log` | Yayın kaydı (en fazla 5.000 olay/istek) |
 
 Medya: `media.kurumsalmuzik.net/m/<şarkı anahtarı>/<NNNN>.ts?t=<imza>` (Worker). Kapaklar ve anons MP3'leri aynı Worker'dan.
-Ayrıntılı alanlar eski projede: `src/main/library.ts` (Manifest tipi), `src/main/api.ts`, `src/main/announcer.ts`.
+Ayrıntılı alanlar eski projede (GitHub `vivamedyatr/vm-radio-player`): `src/main/library.ts` (Manifest tipi), `src/main/api.ts`, `src/main/announcer.ts`.
 
 Akış ve anons kuralları web'den **birebir** C#'a çevrilir ve web'in testleriyle aynı örneklerle sınanır:
 `kurumsalmuzik/src/lib/announce.ts` (+ `announce.test.ts`), tarz akışı/karışık liste mantığı (eski projede `src/main/engine.ts`, `player.ts`).

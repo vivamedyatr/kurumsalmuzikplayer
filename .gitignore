@@ -10,3 +10,4 @@ TestResults/
 vendor/mpv/mpv.exe
 dist/
 deneme.env
+vendor/*.7z

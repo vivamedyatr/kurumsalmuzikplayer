@@ -1,13 +1,13 @@
 # Kurumsal Müzik Player 1.0 (offline, C#)
 
 Mağazaların internet olmasa da çalan Windows programı. Kurumsal Müzik Net'e (kurumsalmuzik.net) bağlıdır: aynı arşiv
-(R2), aynı sunucu, aynı hesaplar ve panel. Electron ile yazılan 2.x (`../VM Offline Radio Player/`, BIRAKILDI) yerine
+(R2), aynı sunucu, aynı hesaplar ve panel. Electron ile yazılan 2.x (GitHub `vivamedyatr/vm-radio-player`, BIRAKILDI) yerine
 C# + mpv ile baştan yazılır.
 
 ## Önce oku
 - `docs/BRIEF.md` — **tek doğru kaynak.** Kararlar, mimari, fazlar. Bir şey çelişirse BRIEF kazanır.
-- `../VM Offline Radio Player/docs/BRIEF.md` — **işlev listesi** (1.0 BRIEF'i aksini söylemedikçe oradaki kurallar geçerli).
-  Oradaki kod (`src/main/*.ts`) sunucuyla konuşmanın ve akış hesabının çalışan örneğidir; mantık oradan çevrilir.
+- `docs/2x-BRIEF.md` — **işlev listesi** (2.x'in BRIEF'i, 11 Kas 2026'da kopyalandı; 1.0 BRIEF'i aksini söylemedikçe oradaki kurallar geçerli).
+  2.x kodu (`src/main/*.ts`, GitHub `vivamedyatr/vm-radio-player`) sunucuyla konuşmanın ve akış hesabının çalışan örneğidir; mantık oradan çevrilir.
 - `docs/KURULUM.md` (derleme, deneme, yayın), `docs/TEST-LISTESI.md` (Onur'un test rehberi, dağıtım kararları).
   Sunucu ve mağaza kurulumu dahil bütün sistem: `../kurumsalmuzik/docs/KURULUM-KILAVUZU.html` §12.
 - Web sistemi: `../kurumsalmuzik/` (kendi `CLAUDE.md` ve `docs/BRIEF.md`'si var). Akış ve anons kuralları
