@@ -3,9 +3,15 @@
 Tek doğru kaynak. Kararlar tarihleriyle yazılır; değişen karar silinmez, üstü çizilip yenisi eklenir.
 
 > **⚠ CANLI SİSTEM — DEĞİŞİKLİK DONDURMASI (karar Onur, 16 Eki 2026).** Kurumsal Müzik Net (sunucu, veritabanı, R2,
-> Cloudflare/Worker, yayınlama) Onur açıkça onay vermeden değiştirilmez. Bu klasördeki programın kodu serbestçe
-> yazılır; ama web projesine, Worker'a ya da R2'ye dokunan her adım (§7) önce Onur'a yazılır, onay beklenir. Onay o işe
+> Cloudflare/Worker, yayınlama) Onur açıkça onay vermeden değiştirilmez. ~~Bu klasördeki programın kodu serbestçe
+> yazılır;~~ ama web projesine, Worker'a ya da R2'ye dokunan her adım (§7) önce Onur'a yazılır, onay beklenir. Onay o işe
 > özeldir, sonrakine geçmez.
+>
+> **Yeni kod gerekmiyor (Onur, 11 Kas 2026).** Kararlı sürüm 1.0.4 (web BRIEF başı, `kararli-2026-11-07`). Bu klasördeki
+> program için de geçerli: bir istek ya da sorun geldiğinde önce mevcut programın bunu zaten karşılayıp karşılamadığına
+> bakılır. Kod yazmak gerçekten gerekiyorsa (ör. sahada bulunan bir hata) **yazılmadan önce** neden gerektiği, ne değişeceği
+> ve etkisi Onur'a yazılır, **Onur onay verirse** yazılır. Onaysız kod, sürüm ya da yayınlama yok. Düzeltme sürümü
+> yayınlanınca mağazalar onu kendiliğinden alır (§2.2; program yeniden açılınca kurulur).
 
 ---
 

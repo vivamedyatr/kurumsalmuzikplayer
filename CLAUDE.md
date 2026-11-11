@@ -20,6 +20,8 @@ Onur Özden. Viva Medya'yı tek başına işletiyor; tam zamanlı yazılımcı d
 - Kararlarını gerekçelendir; ama BRIEF'teki açık kararları **sen verme, sor.**
 
 ## Çalışma kuralları
+- **Yeni kod gerekmiyor (Onur, 11 Kas 2026; BRIEF başı).** Önce mevcut programın karşılayıp karşılamadığına bak; kod
+  gerekiyorsa yazmadan önce gerekçe, değişiklik ve etkiyle Onur'a sor, onaysız yazma.
 - **Antivirüs/fidye korumasıyla uyum birinci gereksinim** (BRIEF §1): bilgisayarda toplu şifreleme yok, binlerce küçük
   dosya yok, kendini açan/paketlenmiş exe yok, gizli süreç numarası yok. Şüpheli görünebilecek her yeni davranış önce
   Onur'un Kaspersky + Acronis'li bilgisayarında denenir.
