@@ -247,6 +247,10 @@ düzeltilir. ~~Gerçek bir mağazada bir hafta~~; indirme adresinin 1.0'a çevri
 - "Günlüğü gönder" (uzaktan destek için günlüğü sunucuya yükleme, §4).
 - Süre dolunca ödeme adresini (web'deki yenileme sayfası, web BRIEF §13.5) tıklanır "Hizmet ödemesi yap" düğmesi
   olarak göstermek; bugün adres yazı olarak görünür.
+- **Anonslarda "sıralı planlama" (A/B/C) — yeni sürüm çıkarılırken mutlaka tekrar değerlendirilecek (Onur, 27 Kas 2026;
+  web BRIEF §8.2 "Bekleyen karar").** Onur'un amaçladığı: her tetikte listedeki **bütün anonslar sırayla** çalar. Bugün
+  her tetikte sıradaki tek anons çalar (`Announce.cs` `SequentialIndex`; "hepsi art arda" yalnızca X/Y'de). Değişiklik
+  web player (`lib/announce.ts` `composeBreak`) ile birlikte yapılmalı; ikisi aynı kuralı çalmalı.
 
 **Onur'un testlerinde açık olanlar (28 Eki 2026):**
 - Windows 7'de sorunsuz çalışıyor (Onur'un testi, 26 Eki 2026); testler sürüyor.
