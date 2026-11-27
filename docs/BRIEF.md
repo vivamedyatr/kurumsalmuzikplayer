@@ -251,6 +251,9 @@ düzeltilir. ~~Gerçek bir mağazada bir hafta~~; indirme adresinin 1.0'a çevri
   web BRIEF §8.2 "Bekleyen karar").** Onur'un amaçladığı: her tetikte listedeki **bütün anonslar sırayla** çalar. Bugün
   her tetikte sıradaki tek anons çalar (`Announce.cs` `SequentialIndex`; "hepsi art arda" yalnızca X/Y'de). Değişiklik
   web player (`lib/announce.ts` `composeBreak`) ile birlikte yapılmalı; ikisi aynı kuralı çalmalı.
+- **Programdan "Sertifikayı indir" (Onur, 27 Kas 2026).** Web tarafı hazır: hesap evrakları R2 `evraklar/<hesap>/sertifika.pdf`,
+  web şubesi `/yayin/sertifika` ile indiriyor (web BRIEF başı, "Hesap evrakları"). Programa düğme + cihaz kimliğiyle yetki
+  denetimli bir offline indirme yolu (`/api/offline/...`) gerekir; şube yalnızca sertifikayı alır, sözleşme yok.
 
 **Onur'un testlerinde açık olanlar (28 Eki 2026):**
 - Windows 7'de sorunsuz çalışıyor (Onur'un testi, 26 Eki 2026); testler sürüyor.
