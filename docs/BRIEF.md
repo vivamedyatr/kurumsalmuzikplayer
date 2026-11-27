@@ -255,6 +255,10 @@ düzeltilir. ~~Gerçek bir mağazada bir hafta~~; indirme adresinin 1.0'a çevri
   web şubesi `/yayin/sertifika` ile indiriyor (web BRIEF başı, "Hesap evrakları"). Programa düğme + cihaz kimliğiyle yetki
   denetimli bir offline indirme yolu (`/api/offline/...`) gerekir; şube yalnızca sertifikayı alır, sözleşme yok.
 
+- *Web kod denetiminden (27 Kas 2026, web `docs/SISTEM-SAGLIGI.md` Madde 8; **yalnızca öneri, müdahale edilmez — Onur**):*
+  D2 saat geri alınınca süre sınırını koruma (görülen en ileri saat saklanır), D3 bozuk parçayı yeniden indirme (bugünkü karar:
+  indirilmez, 26 Eki), D4 müzik motoru yeniden açılamazsa tekrar deneme. Yeni sürüm çıkarılırsa bakılabilir.
+
 **Onur'un testlerinde açık olanlar (28 Eki 2026):**
 - Windows 7'de sorunsuz çalışıyor (Onur'un testi, 26 Eki 2026); testler sürüyor.
 - Arka planda başka işler yapılırken nadir **cızırtı**: Onur aynı bilgisayarda YouTube/Spotify ile karşılaştırıp saatleri
